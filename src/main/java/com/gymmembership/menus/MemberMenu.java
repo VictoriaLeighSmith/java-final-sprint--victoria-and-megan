@@ -16,20 +16,15 @@ import java.util.Scanner;
 
 public class MemberMenu {
 
-    MembershipService memberService = new MembershipService();
-    MerchandiseService merchService = new MerchandiseService();
-    WorkoutClassService workoutService = new WorkoutClassService();
+    private final MembershipService memberService;
+    private final MerchandiseService merchService;
+    private final WorkoutClassService workoutService;
     private final Scanner scanner;
 
-    public MemberMenu(
-            MembershipService memberService,
-            MerchandiseService merchService,
-            WorkoutClassService workoutService,
-            Scanner scanner) {
-
-        this.memberService = memberService;
-        this.merchService = merchService;
-        this.workoutService = workoutService;
+    public MemberMenu(Scanner scanner) {
+        this.memberService = new MembershipService();
+        this.merchService = new MerchandiseService();
+        this.workoutService = new WorkoutClassService();
         this.scanner = scanner;
     }
 
@@ -101,7 +96,6 @@ public class MemberMenu {
 
                     case 2:
                         try {
-
                             ArrayList<Merchandise> merchandise =
                                     merchService.browseMerchandise();
 
