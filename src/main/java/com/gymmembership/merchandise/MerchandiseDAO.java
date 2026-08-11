@@ -29,7 +29,7 @@ public class MerchandiseDAO {
     // Method to get merchandise by ID
     public Merchandise getMerchandiseByID(int merchandiseID) throws SQLException {
         // SQL query to select merchandise from merchandise table with matching ID
-        String query = "SELECT * FROM merchandise WHERE id = ?";
+        String query = "SELECT * FROM merchandise WHERE merchandise_id = ?";
 
         try (Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
@@ -74,7 +74,7 @@ public class MerchandiseDAO {
     public boolean updateProductPrice(int merchandiseID, double newPrice) throws SQLException {
 
         // SQL query to update item's price to new price based on ID
-        String query = "UPDATE merchandise SET price = ? WHERE id = ?";
+        String query = "UPDATE merchandise SET price = ? WHERE merchandise_id = ?";
 
         // Try with resources to connect to DB and set the new price
         try (Connection connection = DatabaseConnection.getConnection();
@@ -95,7 +95,7 @@ public class MerchandiseDAO {
     public boolean updateProductStockLevel(int merchandiseID, int newStockLevel) throws SQLException {
 
         // SQL query to update item's stock level based on ID
-        String query = "UPDATE merchandise SET stock_level = ? WHERE id = ?";
+        String query = "UPDATE merchandise SET stock_level = ? WHERE merchandise_id = ?";
 
         try (Connection connection = DatabaseConnection.getConnection();
         PreparedStatement statement = connection.prepareStatement(query)) {
@@ -118,7 +118,7 @@ public class MerchandiseDAO {
         Merchandise merchandise = new Merchandise();
 
         // Set merchandise object's values based off of the info received from the DB
-        merchandise.setMerchandiseID(resultSet.getInt("id"));
+        merchandise.setMerchandiseID(resultSet.getInt("merchandise_id"));
         merchandise.setProductName(resultSet.getString("product_name"));
         merchandise.setType(resultSet.getString("type"));
         merchandise.setPrice(resultSet.getDouble("price"));
