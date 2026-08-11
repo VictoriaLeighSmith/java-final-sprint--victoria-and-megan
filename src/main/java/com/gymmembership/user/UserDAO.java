@@ -53,7 +53,7 @@ public class UserDAO {
         User user  = new User();
 
         // Use user objects setter methods to set fields
-        user.setUserID(resultSet.getInt("id"));
+        user.setUserID(resultSet.getInt("user_id"));
         user.setUsername(resultSet.getString("username"));
         user.setPassword(resultSet.getString("password"));
         user.setEmail(resultSet.getString("email"));
