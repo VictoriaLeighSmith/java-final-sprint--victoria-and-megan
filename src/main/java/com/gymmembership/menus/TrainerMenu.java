@@ -22,15 +22,10 @@ public class TrainerMenu {
     private final WorkoutClassService workoutService;
     private final Scanner scanner;
 
-    public TrainerMenu(
-            MembershipService memberService,
-            MerchandiseService merchService,
-            WorkoutClassService workoutService,
-            Scanner scanner) {
-
-        this.memberService = memberService;
-        this.merchService = merchService;
-        this.workoutService = workoutService;
+    public TrainerMenu(Scanner scanner) {
+        this.memberService = new MembershipService();
+        this.merchService = new MerchandiseService();
+        this.workoutService = new WorkoutClassService();
         this.scanner = scanner;
     }
 
