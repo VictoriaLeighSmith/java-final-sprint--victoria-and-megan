@@ -11,6 +11,8 @@ import com.gymmembership.workout.WorkoutClassService;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -105,11 +107,35 @@ public class TrainerMenu {
 
         System.out.print("Enter the class date (YYYY-MM-DD): ");
         String dateInput = scanner.nextLine();
-        LocalDate classDate = LocalDate.parse(dateInput);
 
-        System.out.print("Enter the class time (HH:MM): ");
+        DateTimeFormatter dateFormatter =
+                DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate classDate;
+
+        try {
+            classDate = LocalDate.parse(dateInput, dateFormatter);
+
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date. Please use the format YYYY-MM-DD.");
+            return;
+        }
+
+        System.out.print("Enter the class time (ex. 2:30 PM): ");
         String timeInput = scanner.nextLine();
-        LocalTime classTime = LocalTime.parse(timeInput);
+
+        DateTimeFormatter timeFormatter =
+                DateTimeFormatter.ofPattern("h:mm a");
+
+        LocalTime classTime;
+
+        try {
+            classTime = LocalTime.parse(timeInput, timeFormatter);
+
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid time. Please use the format 2:30 PM.");
+            return;
+        }
 
         WorkoutClass newClass = new WorkoutClass(
                 classId,
@@ -164,17 +190,45 @@ public class TrainerMenu {
                     break;
 
                 case 3:
-                    System.out.print("Enter new class date: ");
+                    System.out.print("Enter new class date (YYYY-MM-DD): ");
                     String dateInput = scanner.nextLine();
-                    LocalDate newDate = LocalDate.parse(dateInput);
-                    workoutClass.setClassDate(newDate);
+
+                    DateTimeFormatter dateFormatter =
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+                    try {
+                        LocalDate newDate =
+                                LocalDate.parse(dateInput, dateFormatter);
+
+                        workoutClass.setClassDate(newDate);
+
+                    } catch (DateTimeParseException e) {
+                        System.out.println(
+                                "Invalid date. Please use the format YYYY-MM-DD."
+                        );
+                    }
+
                     break;
 
                 case 4:
-                    System.out.print("Enter new class time: ");
+                    System.out.print("Enter new class time (ex. 2:30 PM): ");
                     String timeInput = scanner.nextLine();
-                    LocalTime newTime = LocalTime.parse(timeInput);
-                    workoutClass.setClassTime(newTime);
+
+                    DateTimeFormatter timeFormatter =
+                            DateTimeFormatter.ofPattern("h:mm a");
+
+                    try {
+                        LocalTime newTime =
+                                LocalTime.parse(timeInput, timeFormatter);
+
+                        workoutClass.setClassTime(newTime);
+
+                    } catch (DateTimeParseException e) {
+                        System.out.println(
+                                "Invalid time. Please use the format 2:30 PM."
+                        );
+                    }
+
                     break;
 
                 case 5:
