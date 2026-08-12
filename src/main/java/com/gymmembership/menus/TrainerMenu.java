@@ -8,7 +8,6 @@ import com.gymmembership.user.User;
 import com.gymmembership.workout.WorkoutClass;
 import com.gymmembership.workout.WorkoutClassService;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -54,196 +53,32 @@ public class TrainerMenu {
 
                 switch (choice) {
 
-                    case 1: {
-                        int classId = 0;
-                        int trainerId = loggedInUser.getUserID();
-
-                        System.out.print("Enter the class name: ");
-                        String className = scanner.nextLine();
-
-                        System.out.print("Enter the class description: ");
-                        String classDescription = scanner.nextLine();
-
-                        System.out.print("Enter the class date (YYYY-MM-DD): ");
-                        String dateInput = scanner.nextLine();
-                        LocalDate classDate = LocalDate.parse(dateInput);
-
-                        System.out.print("Enter the class time (HH:MM): ");
-                        String timeInput = scanner.nextLine();
-                        LocalTime classTime = LocalTime.parse(timeInput);
-
-                        WorkoutClass newClass = new WorkoutClass(
-                                classId,
-                                trainerId,
-                                className,
-                                classDescription,
-                                classDate,
-                                classTime
-                        );
-
-                        workoutService.createWorkoutClass(newClass);
+                    case 1:
+                        createWorkoutClass(loggedInUser);
                         break;
-                    }
 
                     case 2:
-                        System.out.print("Enter the class ID: ");
-                        int classId = scanner.nextInt();
-                        scanner.nextLine();
-
-                        WorkoutClass workoutClass =
-                                workoutService.getClassByID(classId);
-
-                        System.out.println("Your selected class is: " + workoutClass);
-
-                        int updateChoice = -1;
-
-                        while (updateChoice != 0) {
-
-                            System.out.println(" 1. Change Class Name");
-                            System.out.println(" 2. Change Description");
-                            System.out.println(" 3. Change Date");
-                            System.out.println(" 4. Change Time");
-                            System.out.println(" 5. Save Changes");
-                            System.out.println(" 0. Cancel");
-
-                            System.out.print("Choose an update option: ");
-                            updateChoice = scanner.nextInt();
-                            scanner.nextLine();
-
-                            switch (updateChoice) {
-
-                                case 1:
-                                    System.out.print("Enter new class name: ");
-                                    String newName = scanner.nextLine();
-                                    workoutClass.setClassName(newName);
-                                    break;
-
-                                case 2:
-                                    System.out.print("Enter new class description: ");
-                                    String newDesc = scanner.nextLine();
-                                    workoutClass.setDescription(newDesc);
-                                    break;
-
-                                case 3:
-                                    System.out.print("Enter new class date: ");
-                                    String dateInput = scanner.nextLine();
-                                    LocalDate newDate = LocalDate.parse(dateInput);
-                                    workoutClass.setClassDate(newDate);
-                                    break;
-
-                                case 4:
-                                    System.out.print("Enter new class time: ");
-                                    String timeInput = scanner.nextLine();
-                                    LocalTime newTime = LocalTime.parse(timeInput);
-                                    workoutClass.setClassTime(newTime);
-                                    break;
-
-                                case 5:
-                                    workoutService.updateWorkoutClass(workoutClass);
-                                    System.out.println("Workout class successfully updated!");
-                                    System.out.println(workoutClass);
-                                    updateChoice = 0;
-                                    break;
-
-                                case 0:
-                                    break;
-                            }
-                        }
-
+                        updateWorkoutClass();
                         break;
 
                     case 3:
-                        System.out.print("Enter the ID of the class you want to delete: ");
-                        int deleteClassID = scanner.nextInt();
-                        scanner.nextLine();
-
-                        workoutService.deleteWorkoutClass(deleteClassID);
-
-                        System.out.println("Class successfully deleted.");
+                        deleteClass();
                         break;
 
                     case 4:
-                        int membershipId = 0;
-                        int userId = loggedInUser.getUserID();
-                        BigDecimal price = BigDecimal.ZERO;
-
-                        System.out.print(
-                                "Enter a membership type (Monthly, 3-Month, Annual): "
-                        );
-
-                        String memberType = scanner.nextLine();
-
-                        if (!memberType.equalsIgnoreCase("Monthly")
-                                && !memberType.equalsIgnoreCase("3-Month")
-                                && !memberType.equalsIgnoreCase("Annual")) {
-
-                            throw new IllegalArgumentException(
-                                    "Membership type must be Monthly, 3-Month, or Annual."
-                            );
-                        }
-
-                        if (memberType.equalsIgnoreCase("Monthly")) {
-                            price = new BigDecimal("49.99");
-                        }
-
-                        if (memberType.equalsIgnoreCase("3-Month")) {
-                            price = new BigDecimal("129.99");
-                        }
-
-                        if (memberType.equalsIgnoreCase("Annual")) {
-                            price = new BigDecimal("449.99");
-                        }
-
-                        LocalDate purchaseDate = LocalDate.now();
-
-                        Membership newMembership = new Membership(
-                                membershipId,
-                                userId,
-                                memberType,
-                                price,
-                                purchaseDate
-                        );
-
-                        memberService.createMembership(newMembership);
+                        purchaseMembership(loggedInUser);
                         break;
 
                     case 5:
-                        ArrayList<Membership> memberships =
-                                memberService.getMembershipsByUser(
-                                        loggedInUser.getUserID()
-                                );
-
-                        for (Membership membership : memberships) {
-                            System.out.println(membership);
-                        }
-
+                        viewMembership(loggedInUser);
                         break;
 
                     case 6:
-                        ArrayList<WorkoutClass> workoutClasses =
-                                workoutService.getAllClassesByTrainer(
-                                        loggedInUser.getUserID()
-                                );
-
-                        for (WorkoutClass workoutClassByTrainer : workoutClasses) {
-                            System.out.println(workoutClassByTrainer);
-                        }
-
+                        viewClassesByTrainer(loggedInUser);
                         break;
 
                     case 7:
-                        try {
-                            ArrayList<Merchandise> merchandise =
-                                    merchService.browseMerchandise();
-
-                            for (Merchandise item : merchandise) {
-                                System.out.println(item);
-                            }
-
-                        } catch (SQLException e) {
-                            System.out.println("Unable to load merchandise.");
-                        }
-
+                        browseMerchandise();
                         break;
 
                     case 0:
@@ -254,6 +89,200 @@ public class TrainerMenu {
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
+        }
+    }
+
+    private void createWorkoutClass(User loggedInUser) {
+
+        int classId = 0;
+        int trainerId = loggedInUser.getUserID();
+
+        System.out.print("Enter the class name: ");
+        String className = scanner.nextLine();
+
+        System.out.print("Enter the class description: ");
+        String classDescription = scanner.nextLine();
+
+        System.out.print("Enter the class date (YYYY-MM-DD): ");
+        String dateInput = scanner.nextLine();
+        LocalDate classDate = LocalDate.parse(dateInput);
+
+        System.out.print("Enter the class time (HH:MM): ");
+        String timeInput = scanner.nextLine();
+        LocalTime classTime = LocalTime.parse(timeInput);
+
+        WorkoutClass newClass = new WorkoutClass(
+                classId,
+                trainerId,
+                className,
+                classDescription,
+                classDate,
+                classTime
+        );
+
+        workoutService.createWorkoutClass(newClass);
+    }
+
+    private void updateWorkoutClass() {
+
+        System.out.print("Enter the class ID: ");
+        int classId = scanner.nextInt();
+        scanner.nextLine();
+
+        WorkoutClass workoutClass =
+                workoutService.getClassByID(classId);
+
+        System.out.println("Your selected class is: " + workoutClass);
+
+        int updateChoice = -1;
+
+        while (updateChoice != 0) {
+
+            System.out.println(" 1. Change Class Name");
+            System.out.println(" 2. Change Description");
+            System.out.println(" 3. Change Date");
+            System.out.println(" 4. Change Time");
+            System.out.println(" 5. Save Changes");
+            System.out.println(" 0. Cancel");
+
+            System.out.print("Choose an update option: ");
+            updateChoice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (updateChoice) {
+
+                case 1:
+                    System.out.print("Enter new class name: ");
+                    String newName = scanner.nextLine();
+                    workoutClass.setClassName(newName);
+                    break;
+
+                case 2:
+                    System.out.print("Enter new class description: ");
+                    String newDesc = scanner.nextLine();
+                    workoutClass.setDescription(newDesc);
+                    break;
+
+                case 3:
+                    System.out.print("Enter new class date: ");
+                    String dateInput = scanner.nextLine();
+                    LocalDate newDate = LocalDate.parse(dateInput);
+                    workoutClass.setClassDate(newDate);
+                    break;
+
+                case 4:
+                    System.out.print("Enter new class time: ");
+                    String timeInput = scanner.nextLine();
+                    LocalTime newTime = LocalTime.parse(timeInput);
+                    workoutClass.setClassTime(newTime);
+                    break;
+
+                case 5:
+                    workoutService.updateWorkoutClass(workoutClass);
+                    System.out.println("Workout class successfully updated!");
+                    System.out.println(workoutClass);
+                    updateChoice = 0;
+                    break;
+
+                case 0:
+                    break;
+            }
+        }
+    }
+
+    private void deleteClass() {
+
+        System.out.print("Enter the ID of the class you want to delete: ");
+        int deleteClassID = scanner.nextInt();
+        scanner.nextLine();
+
+        workoutService.deleteWorkoutClass(deleteClassID);
+
+        System.out.println("Class successfully deleted.");
+    }
+
+    private void purchaseMembership(User loggedInUser) {
+
+        int membershipId = 0;
+        int userId = loggedInUser.getUserID();
+        double price = 0;
+
+        System.out.print(
+                "Enter a membership type (Monthly, 3-Month, Annual): "
+        );
+
+        String memberType = scanner.nextLine();
+
+        if (!memberType.equalsIgnoreCase("Monthly")
+                && !memberType.equalsIgnoreCase("3-Month")
+                && !memberType.equalsIgnoreCase("Annual")) {
+
+            throw new IllegalArgumentException(
+                    "Membership type must be Monthly, 3-Month, or Annual."
+            );
+        }
+
+        if (memberType.equalsIgnoreCase("Monthly")) {
+            price = 49.99;
+        }
+
+        if (memberType.equalsIgnoreCase("3-Month")) {
+            price = 129.99;
+        }
+
+        if (memberType.equalsIgnoreCase("Annual")) {
+            price = 449.99;
+        }
+
+        LocalDate purchaseDate = LocalDate.now();
+
+        Membership newMembership = new Membership(
+                membershipId,
+                userId,
+                memberType,
+                price,
+                purchaseDate
+        );
+
+        memberService.createMembership(newMembership);
+    }
+
+    private void viewMembership(User loggedInUser) {
+
+        ArrayList<Membership> memberships =
+                memberService.getMembershipsByUser(
+                        loggedInUser.getUserID()
+                );
+
+        for (Membership membership : memberships) {
+            System.out.println(membership);
+        }
+    }
+
+    private void viewClassesByTrainer(User loggedInUser) {
+
+        ArrayList<WorkoutClass> workoutClasses =
+                workoutService.getAllClassesByTrainer(
+                        loggedInUser.getUserID()
+                );
+
+        for (WorkoutClass workoutClassByTrainer : workoutClasses) {
+            System.out.println(workoutClassByTrainer);
+        }
+    }
+
+    private void browseMerchandise() {
+
+        try {
+            ArrayList<Merchandise> merchandise =
+                    merchService.browseMerchandise();
+
+            for (Merchandise item : merchandise) {
+                System.out.println(item);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Unable to load merchandise.");
         }
     }
 }

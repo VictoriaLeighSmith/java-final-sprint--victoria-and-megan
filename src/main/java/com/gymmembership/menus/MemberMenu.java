@@ -51,84 +51,19 @@ public class MemberMenu {
                 switch (choice) {
 
                     case 1:
-                        int membershipId = 0;
-                        int userId = loggedInUser.getUserID();
-                        double price = 0;
-
-                        System.out.print(
-                                "Enter a membership type (Monthly, 3-Month, Annual): ");
-
-                        String memberType = scanner.next();
-
-                        if (!memberType.equalsIgnoreCase("Monthly")
-                                && !memberType.equalsIgnoreCase("3-Month")
-                                && !memberType.equalsIgnoreCase("Annual")) {
-
-                            throw new IllegalArgumentException(
-                                    "Membership type must be Monthly, 3-Month, or Annual."
-                            );
-                        }
-
-                        if (memberType.equalsIgnoreCase("Monthly")) {
-                            price = 49.99;
-                        }
-
-                        if (memberType.equalsIgnoreCase("3-Month")) {
-                            price = 129.99;
-                        }
-
-                        if (memberType.equalsIgnoreCase("Annual")) {
-                            price = 449.99;
-                        }
-
-                        LocalDate purchaseDate = LocalDate.now();
-
-                        Membership newMembership = new Membership(
-                                membershipId,
-                                userId,
-                                memberType,
-                                price,
-                                purchaseDate
-                        );
-
-                        memberService.createMembership(newMembership);
+                        purchaseMembership(loggedInUser);
                         break;
 
                     case 2:
-                        try {
-                            ArrayList<Merchandise> merchandise =
-                                    merchService.browseMerchandise();
-
-                            for (Merchandise item : merchandise) {
-                                System.out.println(item);
-                            }
-
-                        } catch (SQLException e) {
-                            System.out.println("Unable to load merchandise.");
-                        }
-
+                        viewMerchandise();
                         break;
 
                     case 3:
-                        ArrayList<WorkoutClass> workoutClasses =
-                                workoutService.getAllWorkoutClasses();
-
-                        for (WorkoutClass workoutClass : workoutClasses) {
-                            System.out.println(workoutClass);
-                        }
-
+                        browseWorkoutClasses();
                         break;
 
                     case 4:
-                        double totalExpenses =
-                                memberService.getTotalExpensesByUser(
-                                        loggedInUser.getUserID()
-                                );
-
-                        System.out.println(
-                                "Total membership expenses: $" + totalExpenses
-                        );
-
+                        viewPersonalExpenses(loggedInUser);
                         break;
 
                     case 0:
@@ -140,5 +75,83 @@ public class MemberMenu {
                 System.out.println(e.getMessage());
             }
         }
+    }
+
+    private void purchaseMembership(User loggedInUser) {
+        int membershipId = 0;
+        int userId = loggedInUser.getUserID();
+        double price = 0;
+
+        System.out.print(
+                "Enter a membership type (Monthly, 3-Month, Annual): ");
+
+        String memberType = scanner.next();
+
+        if (!memberType.equalsIgnoreCase("Monthly")
+                && !memberType.equalsIgnoreCase("3-Month")
+                && !memberType.equalsIgnoreCase("Annual")) {
+
+            throw new IllegalArgumentException(
+                    "Membership type must be Monthly, 3-Month, or Annual."
+            );
+        }
+
+        if (memberType.equalsIgnoreCase("Monthly")) {
+            price = 49.99;
+        }
+
+        if (memberType.equalsIgnoreCase("3-Month")) {
+            price = 129.99;
+        }
+
+        if (memberType.equalsIgnoreCase("Annual")) {
+            price = 449.99;
+        }
+
+        LocalDate purchaseDate = LocalDate.now();
+
+        Membership newMembership = new Membership(
+                membershipId,
+                userId,
+                memberType,
+                price,
+                purchaseDate
+        );
+
+        memberService.createMembership(newMembership);
+    }
+
+    private void viewMerchandise() {
+        try {
+            ArrayList<Merchandise> merchandise =
+                    merchService.browseMerchandise();
+
+            for (Merchandise item : merchandise) {
+                System.out.println(item);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Unable to load merchandise.");
+        }
+    }
+
+    private void browseWorkoutClasses() {
+        ArrayList<WorkoutClass> workoutClasses =
+                workoutService.getAllWorkoutClasses();
+
+        for (WorkoutClass workoutClass : workoutClasses) {
+            System.out.println(workoutClass);
+        }
+    }
+
+    private void viewPersonalExpenses(User loggedInUser){
+        double totalExpenses =
+                memberService.getTotalExpensesByUser(
+                        loggedInUser.getUserID()
+                );
+
+        System.out.println(
+                "Total membership expenses: $" + totalExpenses
+        );
     }
 }
