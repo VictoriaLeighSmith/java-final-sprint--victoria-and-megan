@@ -1,6 +1,7 @@
 package com.gymmembership.user;
 import org.mindrot.jbcrypt.BCrypt;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class UserService {
 
@@ -50,5 +51,20 @@ public class UserService {
             System.out.println("Login failed.");
             return null;
         }
+    }
+
+    // Method to delete user
+    public void deleteUser(int userID) throws SQLException {
+       boolean deletedUser = userDAO.deleteUserFromDatabase(userID);
+
+       // If the deleteUserFromDatabase method returns a falsy value, display an error to the user
+       if (!deletedUser) {
+           throw new IllegalArgumentException("User with ID " + userID + " not found");
+       }
+    }
+
+    // Method to call get all users
+    public ArrayList<User> getAllUsers() throws SQLException {
+        return userDAO.getAllUsersFromDB();
     }
 }
