@@ -29,6 +29,14 @@ public class WorkoutClass {
         this.classTime = classTime;
     }
 
+    public WorkoutClass(int trainerId, String className, String description, LocalDate classDate, LocalTime classTime) {
+        this.trainerId = trainerId;
+        this.className = className;
+        this.description = description;
+        this.classDate = classDate;
+        this.classTime = classTime;
+    }
+
     public int getClassId() {
         return classId;
     }
