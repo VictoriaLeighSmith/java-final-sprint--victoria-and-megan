@@ -28,7 +28,7 @@ public class AdminMenu {
         this.scanner = scanner;
     }
 
-    public void displayAdminMenu() throws SQLException {
+    public void showMenu(User loggedInUser) throws SQLException {
         while (true) {
             System.out.println("Admin Menu");
             System.out.println("1. Display All Users");
