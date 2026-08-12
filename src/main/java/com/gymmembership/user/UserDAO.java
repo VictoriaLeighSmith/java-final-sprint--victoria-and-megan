@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class UserDAO {
 
@@ -45,6 +46,48 @@ public class UserDAO {
             }
         }
         return null;
+    }
+
+    // Method to get all users from the DB
+    public ArrayList<User> getAllUsersFromDB() throws SQLException {
+
+        // SQL query to get all users from the DB
+        String query = "SELECT * FROM users";
+
+        // Try with resources to run the above query
+        try (Connection connection = DatabaseConnection.getConnection();
+        PreparedStatement userStatement = connection.prepareStatement(query)) {
+
+            try (ResultSet resultSet = userStatement.executeQuery()) {
+                ArrayList<User> allUsers = new ArrayList<>();
+
+                // If we get results, add the user(s) found to the allUsers array
+                while (resultSet.next()) {
+                    User user = buildNewUserObject(resultSet);
+                    allUsers.add(user);
+                }
+
+                return allUsers;
+            }
+        }
+    }
+
+    // Method to delete users from the DB
+    public boolean deleteUserFromDatabase(int userID) throws SQLException {
+        // SQL query to delete a user from the DB based on ID
+        String  query = "DELETE FROM users WHERE user_id = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+        PreparedStatement deleteStatement = connection.prepareStatement(query)) {
+
+            deleteStatement.setInt(1, userID);
+
+            // Store the result of the update in a variable
+            int rowsUpdated = deleteStatement.executeUpdate();
+
+            // Use the result to return a boolean value. The service class will handle the result.
+            return rowsUpdated > 0;
+        }
     }
 
     // Separated this method to build a user object from the result set so we can also use it with get all users later

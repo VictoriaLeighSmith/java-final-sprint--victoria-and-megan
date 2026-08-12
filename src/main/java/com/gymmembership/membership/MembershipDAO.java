@@ -3,7 +3,6 @@ package com.gymmembership.membership;
 import com.gymmembership.database.DatabaseConnection;
 import com.gymmembership.workout.WorkoutClass;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,7 +31,7 @@ public class MembershipDAO {
                     2,
                     membership.getMembershipType());
 
-            statement.setBigDecimal(
+            statement.setDouble(
                     3,
                     membership.getPrice());
 
@@ -72,7 +71,7 @@ public class MembershipDAO {
                 int membershipId = rs.getInt("membership_id");
                 int userId = rs.getInt("user_id");
                 String membershipType = rs.getString("membership_type");
-                BigDecimal price = rs.getBigDecimal("price");
+                double price = rs.getDouble("price");
                 java.sql.Date purchaseDate = rs.getDate("purchase_date");
 
                 Membership newMembership = new Membership(
@@ -118,7 +117,7 @@ public class MembershipDAO {
             while (rs.next()) {
                 int membershipId = rs.getInt("membership_id");
                 String membershipType = rs.getString("membership_type");
-                BigDecimal price = rs.getBigDecimal("price");
+                double price = rs.getDouble("price");
                 java.sql.Date purchaseDate = rs.getDate("purchase_date");
 
                 Membership singleMembership = new Membership(

@@ -1,6 +1,5 @@
 package com.gymmembership.membership;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 // Represents a gym membership purchased by a user
@@ -9,7 +8,7 @@ public class Membership {
     private int membershipId;
     private int userId;
     private String membershipType;
-    private BigDecimal price;
+    private double price;
     private LocalDate purchaseDate;
 
     // No-argument constructor
@@ -19,7 +18,7 @@ public class Membership {
 
     // Creates a Membership object using all membership details
     public Membership(int membershipId, int userId, String membershipType,
-                      BigDecimal price, LocalDate purchaseDate) {
+                      double price, LocalDate purchaseDate) {
         this.membershipId = membershipId;
         this.userId = userId;
         this.membershipType = membershipType;
@@ -51,11 +50,11 @@ public class Membership {
         this.membershipType = membershipType;
     }
 
-    public BigDecimal getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 

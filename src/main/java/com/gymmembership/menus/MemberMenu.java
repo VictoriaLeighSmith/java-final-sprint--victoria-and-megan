@@ -53,7 +53,7 @@ public class MemberMenu {
                     case 1:
                         int membershipId = 0;
                         int userId = loggedInUser.getUserID();
-                        BigDecimal price = BigDecimal.ZERO;
+                        double price = 0;
 
                         System.out.print(
                                 "Enter a membership type (Monthly, 3-Month, Annual): ");
@@ -70,15 +70,15 @@ public class MemberMenu {
                         }
 
                         if (memberType.equalsIgnoreCase("Monthly")) {
-                            price = new BigDecimal("49.99");
+                            price = 49.99;
                         }
 
                         if (memberType.equalsIgnoreCase("3-Month")) {
-                            price = new BigDecimal("129.99");
+                            price = 129.99;
                         }
 
                         if (memberType.equalsIgnoreCase("Annual")) {
-                            price = new BigDecimal("449.99");
+                            price = 449.99;
                         }
 
                         LocalDate purchaseDate = LocalDate.now();
@@ -120,7 +120,7 @@ public class MemberMenu {
                         break;
 
                     case 4:
-                        BigDecimal totalExpenses =
+                        double totalExpenses =
                                 memberService.getTotalExpensesByUser(
                                         loggedInUser.getUserID()
                                 );

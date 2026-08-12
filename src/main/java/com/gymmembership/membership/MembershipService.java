@@ -1,6 +1,5 @@
 package com.gymmembership.membership;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 
 public class MembershipService {
@@ -29,11 +28,7 @@ public class MembershipService {
             throw new IllegalArgumentException("Membership type must be entered.");
         }
 
-        if (membership.getPrice() == null) {
-            throw new IllegalArgumentException("Price must be entered.");
-        }
-
-        if (membership.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+        if (membership.getPrice() <= 0) {
             throw new IllegalArgumentException("Price must be greater than 0.");
         }
 
@@ -60,7 +55,7 @@ public class MembershipService {
     }
 
     // Calculates the total amount spent on memberships by one user
-    public BigDecimal getTotalExpensesByUser(int userId) {
+    public double getTotalExpensesByUser(int userId) {
 
         if (userId <= 0) {
             throw new IllegalArgumentException("User ID must be greater than 0.");
@@ -69,17 +64,17 @@ public class MembershipService {
         ArrayList<Membership> memberships =
                 membershipDao.getMembershipsByUser(userId);
 
-        BigDecimal totalExpenses = BigDecimal.ZERO;
+        double totalExpenses = 0;
 
         for (Membership membership : memberships) {
-            totalExpenses = totalExpenses.add(membership.getPrice());
+            totalExpenses += membership.getPrice();
         }
 
         return totalExpenses;
     }
 
     // Calculates total membership revenue for a specific year
-    public BigDecimal getTotalAnnualRevenue(int year) {
+    public double getTotalAnnualRevenue(int year) {
 
         if (year <= 0) {
             throw new IllegalArgumentException("Year must be greater than 0.");
@@ -88,11 +83,11 @@ public class MembershipService {
         ArrayList<Membership> memberships =
                 membershipDao.getAllMemberships();
 
-        BigDecimal totalRevenue = BigDecimal.ZERO;
+        double totalRevenue = 0;
 
         for (Membership membership : memberships) {
             if (membership.getPurchaseDate().getYear() == year) {
-                totalRevenue = totalRevenue.add(membership.getPrice());
+                totalRevenue += membership.getPrice();
             }
         }
 
