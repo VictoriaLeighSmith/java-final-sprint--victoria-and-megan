@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS workout_classes (
     class_id SERIAL PRIMARY KEY,
-    trainer_id INT NOT NULL REFERENCES users(id),
+    trainer_id INT NOT NULL REFERENCES users(user_id),
     class_name TEXT NOT NULL,
     description TEXT NOT NULL,
     class_date DATE NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS workout_classes (
 
 CREATE TABLE IF NOT EXISTS memberships (
     membership_id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES users(id),
+    user_id INT NOT NULL REFERENCES users(user_id),
     membership_type TEXT NOT NULL,
     price DECIMAL NOT NULL,
     purchase_date DATE NOT NULL
