@@ -1,11 +1,18 @@
 package com.gymmembership.menus;
 
 import com.gymmembership.membership.MembershipService;
+import com.gymmembership.merchandise.Merchandise;
+import com.gymmembership.merchandise.MerchandiseService;
 import com.gymmembership.user.User;
 import com.gymmembership.user.UserService;
+import com.gymmembership.workout.WorkoutClass;
+import com.gymmembership.workout.WorkoutClassService;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -13,17 +20,74 @@ public class AdminMenu {
 
     private final UserService userService = new UserService();
     private final MembershipService membershipService = new MembershipService();
+    private final MerchandiseService merchandiseService = new MerchandiseService();
+    private final WorkoutClassService workoutClassService = new WorkoutClassService();
     private final Scanner scanner;
 
     public AdminMenu(Scanner scanner) {
         this.scanner = scanner;
     }
 
-    // -------- TO DO --------
-    // Track total annual membership revenue
-    // Add new merchandise items and set prices
-    // View merchandise stock and total value
-    // Create, update and delete workout classes
+    public void displayAdminMenu() throws SQLException {
+        while (true) {
+            System.out.println("Admin Menu");
+            System.out.println("1. Display All Users");
+            System.out.println("2. Delete User");
+            System.out.println("3. Get Total Annual Revenue");
+            System.out.println("4. Add New Merchandise");
+            System.out.println("5. Update Merchandise Price");
+            System.out.println("6. Restock Merchandise");
+            System.out.println("7. View All Merchandise and Total Value");
+            System.out.println("8. Create New Workout Class");
+            System.out.println("9. Update Workout Class");
+            System.out.println("10. Delete Workout Class");
+            System.out.println("11. Logout");
+
+            System.out.println();
+            System.out.println("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    displayAllUsers();
+                    break;
+                case 2:
+                    deleteAUser();
+                    break;
+                case 3:
+                    getTotalAnnualRevenue();
+                    break;
+                case 4:
+                    addNewMerchandiseItem();
+                    break;
+                case 5:
+                    updateMerchandisePrice();
+                    break;
+                case 6:
+                    restockMerchandise();
+                    break;
+                case 7:
+                    viewMerchandiseAndTotalValue();
+                    break;
+                case 8:
+                    createWorkoutClass();
+                    break;
+                case 9:
+                    updateWorkoutClass();
+                    break;
+                case 10:
+                    deleteWorkoutClass();
+                    break;
+                case 11:
+                    System.out.println("Logging out ...");
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+                    break;
+            }
+        }
+    }
 
     // Method to view all users and contact info
     private void displayAllUsers() throws SQLException {
@@ -33,6 +97,7 @@ public class AdminMenu {
         System.out.println("All Users");
 
         for (User user : allUsers) {
+            System.out.println();
             System.out.println("User ID: " + user.getUserID());
             System.out.println("Username: " + user.getUsername());
             System.out.println("Email: " + user.getEmail());
@@ -55,12 +120,206 @@ public class AdminMenu {
     }
 
     // Method to track total annual membership revenue
-    private double getTotalAnnualRevenue() throws SQLException {
+    private void getTotalAnnualRevenue() throws SQLException {
 
         System.out.println("Enter the year for total annual revenue: ");
         int year = scanner.nextInt();
         scanner.nextLine();
 
+        double totalAnnualRevenue = membershipService.getTotalAnnualRevenue(year);
 
+        System.out.printf("Total Annual Revenue for %d: %.2f%n", year, totalAnnualRevenue);
+    }
+
+    private void addNewMerchandiseItem() throws SQLException {
+
+        System.out.println("Enter the name of the merchandise item: ");
+        String productName = scanner.nextLine();
+
+        System.out.println("Enter the type of merchandise item: ");
+        String type = scanner.nextLine();
+
+        System.out.println("Enter the price of the  merchandise item: ");
+        double price = scanner.nextDouble();
+        scanner.nextLine();
+
+        System.out.println("Enter the quantity of the merchandise item: ");
+        int stockLevel = scanner.nextInt();
+        scanner.nextLine();
+
+        Merchandise merchandise = new Merchandise(productName, type, price, stockLevel);
+
+        merchandiseService.addMerchandise(merchandise);
+    }
+
+    // Method to change merchandise item's price
+    private void updateMerchandisePrice() throws SQLException {
+        System.out.println("Enter the ID of the merchandise item: ");
+        int merchandiseID = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.println("Enter the new price of the merchandise item: ");
+        double merchandisePrice = scanner.nextDouble();
+        scanner.nextLine();
+
+        merchandiseService.changeProductPrice(merchandiseID, merchandisePrice);
+
+        System.out.println("Merchandise price updated successfully!");
+    }
+
+    // Method to restock merchandise
+    private void restockMerchandise() throws SQLException {
+        System.out.println("Enter the ID of the merchandise item: ");
+        int merchandiseID = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.println("Enter the quantity to add to merchandise stock: ");
+        int quantity = scanner.nextInt();
+        scanner.nextLine();
+
+        merchandiseService.addStock(merchandiseID, quantity);
+
+        System.out.println("Merchandise stock added successfully!");
+    }
+
+    // Method to view merchandise stock and total value
+    private void viewMerchandiseAndTotalValue() throws SQLException {
+        ArrayList<Merchandise> allMerchandise = merchandiseService.browseMerchandise();
+
+        System.out.println("All Merchandise Items");
+
+        for (Merchandise merchandise : allMerchandise) {
+            System.out.println();
+            System.out.println("Merchandise ID: " + merchandise.getMerchandiseID());
+            System.out.println("Merchandise Name: " + merchandise.getProductName());
+            System.out.println("Merchandise Type: " + merchandise.getType());
+            System.out.println("Merchandise Price: " + merchandise.getPrice());
+            System.out.println("Merchandise Stock Level: " + merchandise.getStockLevel());
+            System.out.println("-".repeat(20));
+        }
+
+        double totalValue = merchandiseService.calculateInventoryValue();
+
+        System.out.println();
+        System.out.println("Total Inventory Value: " + totalValue);
+    }
+
+    // Method to create a workout class
+    private void createWorkoutClass() throws SQLException {
+
+        System.out.println("Enter the trainer ID for the workout class: ");
+        int trainerID = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.println("Enter the workout class name: ");
+        String className = scanner.nextLine();
+
+        System.out.println("Enter the workout class description: ");
+        String classDescription = scanner.nextLine();
+
+        // Think about adding helper methods for valid date and time as it's repeated in two methods
+        LocalDate convertedDate = null;
+        boolean validDate = false;
+
+        while (!validDate) {
+            System.out.println("Enter the workout class date (YYYY-MM-DD): ");
+            String classDate = scanner.nextLine();
+
+            try {
+                convertedDate = LocalDate.parse(classDate);
+                validDate = true;
+            } catch (DateTimeParseException error) {
+                System.out.println("Invalid date format!");
+            }
+        }
+
+        DateTimeFormatter parser = DateTimeFormatter.ofPattern("h[:mm]a");
+        LocalTime convertedTime = null;
+        boolean validTime = false;
+
+        while (!validTime) {
+            System.out.println("Enter the workout class time (e.g. 6:30PM): ");
+            String classTime = scanner.nextLine();
+
+            try {
+                convertedTime = LocalTime.parse(classTime, parser);
+                validTime = true;
+            } catch (DateTimeParseException error) {
+                System.out.println("Invalid time format!");
+            }
+        }
+
+        // Create a new workout class with the user input
+        WorkoutClass workoutClass = new WorkoutClass(trainerID, className, classDescription, convertedDate, convertedTime);
+        workoutClassService.createWorkoutClass(workoutClass);
+
+        System.out.println("Workout class successfully created!");
+    }
+
+    // Method to update workout class
+    private void updateWorkoutClass() throws SQLException {
+
+        System.out.println("Enter the workout class ID you wish to update: ");
+        int workoutClassID = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.println("Enter the new trainer ID: ");
+        int trainerID = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.println("Enter the new workout class name: ");
+        String className = scanner.nextLine();
+
+        System.out.println("Enter the new workout class description: ");
+        String classDescription = scanner.nextLine();
+
+        LocalDate convertedDate = null;
+        boolean validDate = false;
+
+        while (!validDate) {
+            System.out.println("Enter the new workout class date (YYYY-MM-DD): ");
+            String classDate = scanner.nextLine();
+
+            try {
+                convertedDate = LocalDate.parse(classDate);
+                validDate = true;
+            }  catch (DateTimeParseException error) {
+                System.out.println("Invalid date format!");
+            }
+        }
+
+        DateTimeFormatter parser = DateTimeFormatter.ofPattern("h[:mm]a");
+        LocalTime convertedTime = null;
+        boolean validTime = false;
+
+        while (!validTime) {
+            System.out.println("Enter the new workout class time (e.g. 6:30PM): ");
+            String classTime = scanner.nextLine();
+
+            try {
+                convertedTime = LocalTime.parse(classTime, parser);
+                validTime = true;
+            } catch (DateTimeParseException error) {
+                System.out.println("Invalid time format!");
+            }
+        }
+
+        // Create new workout class with updated values
+        WorkoutClass workoutClass = new WorkoutClass(workoutClassID, trainerID, className, classDescription, convertedDate, convertedTime);
+
+        workoutClassService.updateWorkoutClass(workoutClass);
+
+        System.out.println("Workout class successfully updated!");
+    }
+
+    // Method to delete workout class
+    private void deleteWorkoutClass() throws SQLException {
+        System.out.println("Enter the workout class ID to delete: ");
+        int workoutClassID = scanner.nextInt();
+        scanner.nextLine();
+
+        workoutClassService.deleteWorkoutClass(workoutClassID);
+
+        System.out.println("Workout class successfully deleted!");
     }
 }
