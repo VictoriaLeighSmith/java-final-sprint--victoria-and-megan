@@ -1,5 +1,6 @@
 package com.gymmembership.menus;
 
+import com.gymmembership.logging.AppLogger;
 import com.gymmembership.membership.MembershipService;
 import com.gymmembership.merchandise.Merchandise;
 import com.gymmembership.merchandise.MerchandiseService;
@@ -123,14 +124,15 @@ public class AdminMenu {
     // Method to delete users from the system
     private void deleteUser() throws SQLException {
         System.out.print("Enter the ID of the user you want to delete: ");
-        int userID  = scanner.nextInt();
+        int userID = scanner.nextInt();
         scanner.nextLine();
 
         userService.deleteUser(userID);
 
         System.out.println();
         System.out.println("User successfully deleted!");
-        // ADD LOGGER HERE FOR ADMIN DELETING USER
+
+        AppLogger.warning("Admin deleted user with ID: " + userID);
     }
 
     // Method to track total annual membership revenue
@@ -163,7 +165,8 @@ public class AdminMenu {
         Merchandise merchandise = new Merchandise(productName, type, price, stockLevel);
 
         merchandiseService.addMerchandise(merchandise);
-        // ADD LOGGER HERE FOR ADMIN ADDING NEW MERCH ITEM
+
+        AppLogger.warning("Admin added new merchandise item: " + productName);
     }
 
     // Method to change merchandise item's price
@@ -180,7 +183,8 @@ public class AdminMenu {
 
         System.out.println();
         System.out.println("Merchandise price updated successfully!");
-        // ADD LOGGER HERE FOR ADMIN CHANGING ITEM PRICE
+
+        AppLogger.warning("Admin changed price for merchandise ID: " + merchandiseID);
     }
 
     // Method to restock merchandise
@@ -197,7 +201,8 @@ public class AdminMenu {
 
         System.out.println();
         System.out.println("Merchandise stock added successfully!");
-        // ADD LOGGER HERE FOR ADMIN ADDING STOCK TO MERCH
+
+        AppLogger.warning("Admin restocked merchandise ID: " + merchandiseID);
     }
 
     // Method to view merchandise stock and total value
@@ -244,12 +249,20 @@ public class AdminMenu {
         LocalTime convertedTime = getValidTime("Enter the workout class time (e.g. 6:30PM): ");
 
         // Create a new workout class with the user input
-        WorkoutClass workoutClass = new WorkoutClass(trainerID, className, classDescription, convertedDate, convertedTime);
+        WorkoutClass workoutClass = new WorkoutClass(
+                trainerID,
+                className,
+                classDescription,
+                convertedDate,
+                convertedTime
+        );
+
         workoutClassService.createWorkoutClass(workoutClass);
 
         System.out.println();
         System.out.println("Workout class successfully created!");
-        // ADD LOGGER HERE FOR ADMIN CREATING WORKOUT CLASS
+
+        AppLogger.warning("Admin created workout class: " + className);
     }
 
     // Method to update workout class
@@ -272,13 +285,21 @@ public class AdminMenu {
         LocalTime convertedTime = getValidTime("Enter the new workout class time (e.g. 6:30PM): ");
 
         // Create new workout class with updated values
-        WorkoutClass workoutClass = new WorkoutClass(workoutClassID, trainerID, className, classDescription, convertedDate, convertedTime);
+        WorkoutClass workoutClass = new WorkoutClass(
+                workoutClassID,
+                trainerID,
+                className,
+                classDescription,
+                convertedDate,
+                convertedTime
+        );
 
         workoutClassService.updateWorkoutClass(workoutClass);
 
         System.out.println();
         System.out.println("Workout class successfully updated!");
-        // ADD LOGGER HERE FOR ADMIN UPDATING WORKOUT CLASS
+
+        AppLogger.warning("Admin updated workout class with ID: " + workoutClassID);
     }
 
     // Method to delete workout class
@@ -291,7 +312,8 @@ public class AdminMenu {
 
         System.out.println();
         System.out.println("Workout class successfully deleted!");
-        // ADD LOGGER HERE FOR ADMIN DELETING WORKOUT CLASS
+
+        AppLogger.warning("Admin deleted workout class with ID: " + workoutClassID);
     }
 
     // Helper method to validate input date
@@ -315,7 +337,11 @@ public class AdminMenu {
 
     // Helper method to validate input time
     private LocalTime getValidTime(String prompt) {
-        DateTimeFormatter parser = new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("h:mma").toFormatter(Locale.ENGLISH);
+        DateTimeFormatter parser = new DateTimeFormatterBuilder()
+                .parseCaseInsensitive()
+                .appendPattern("h:mma")
+                .toFormatter(Locale.ENGLISH);
+
         LocalTime convertedTime = null;
         boolean validTime = false;
 
