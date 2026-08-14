@@ -7,6 +7,9 @@ target/
 ### Logging file ###
 app.log
 
+### Generated Reports
+reports/*.txt
+
 ### IntelliJ IDEA ###
 .idea/
 *.iws
