@@ -4,8 +4,12 @@ target/
 !**/src/test/**/target/
 .kotlin
 
-### Logging file ###
+### Logging and log lock file ###
 app.log
+*.lck
+
+### Generated Reports
+reports/*.txt
 
 ### IntelliJ IDEA ###
 .idea/

@@ -1,6 +1,5 @@
 package com.gymmembership.menus;
 
-import com.gymmembership.logging.AppLogger;
 import com.gymmembership.membership.MembershipService;
 import com.gymmembership.merchandise.Merchandise;
 import com.gymmembership.merchandise.MerchandiseService;
@@ -8,6 +7,8 @@ import com.gymmembership.user.User;
 import com.gymmembership.user.UserService;
 import com.gymmembership.workout.WorkoutClass;
 import com.gymmembership.workout.WorkoutClassService;
+import com.gymmembership.reports.MembershipReportExporter;
+import com.gymmembership.reports.MerchandiseReportExporter;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -45,6 +46,7 @@ public class AdminMenu {
             System.out.println("8. Create New Workout Class");
             System.out.println("9. Update Workout Class");
             System.out.println("10. Delete Workout Class");
+            System.out.println("11. Export Reports to File");
             System.out.println("0. Logout");
 
             System.out.println();
@@ -82,6 +84,9 @@ public class AdminMenu {
                         break;
                     case "10":
                         deleteWorkoutClass();
+                        break;
+                    case "11":
+                        exportReports();
                         break;
                     case "0":
                         System.out.println("Logging out ...");
@@ -124,15 +129,14 @@ public class AdminMenu {
     // Method to delete users from the system
     private void deleteUser() throws SQLException {
         System.out.print("Enter the ID of the user you want to delete: ");
-        int userID = scanner.nextInt();
+        int userID  = scanner.nextInt();
         scanner.nextLine();
 
         userService.deleteUser(userID);
 
         System.out.println();
         System.out.println("User successfully deleted!");
-
-        AppLogger.warning("Admin deleted user with ID: " + userID);
+        // ADD LOGGER HERE FOR ADMIN DELETING USER
     }
 
     // Method to track total annual membership revenue
@@ -165,8 +169,7 @@ public class AdminMenu {
         Merchandise merchandise = new Merchandise(productName, type, price, stockLevel);
 
         merchandiseService.addMerchandise(merchandise);
-
-        AppLogger.warning("Admin added new merchandise item: " + productName);
+        // ADD LOGGER HERE FOR ADMIN ADDING NEW MERCH ITEM
     }
 
     // Method to change merchandise item's price
@@ -183,8 +186,7 @@ public class AdminMenu {
 
         System.out.println();
         System.out.println("Merchandise price updated successfully!");
-
-        AppLogger.warning("Admin changed price for merchandise ID: " + merchandiseID);
+        // ADD LOGGER HERE FOR ADMIN CHANGING ITEM PRICE
     }
 
     // Method to restock merchandise
@@ -201,8 +203,7 @@ public class AdminMenu {
 
         System.out.println();
         System.out.println("Merchandise stock added successfully!");
-
-        AppLogger.warning("Admin restocked merchandise ID: " + merchandiseID);
+        // ADD LOGGER HERE FOR ADMIN ADDING STOCK TO MERCH
     }
 
     // Method to view merchandise stock and total value
@@ -249,20 +250,12 @@ public class AdminMenu {
         LocalTime convertedTime = getValidTime("Enter the workout class time (e.g. 6:30PM): ");
 
         // Create a new workout class with the user input
-        WorkoutClass workoutClass = new WorkoutClass(
-                trainerID,
-                className,
-                classDescription,
-                convertedDate,
-                convertedTime
-        );
-
+        WorkoutClass workoutClass = new WorkoutClass(trainerID, className, classDescription, convertedDate, convertedTime);
         workoutClassService.createWorkoutClass(workoutClass);
 
         System.out.println();
         System.out.println("Workout class successfully created!");
-
-        AppLogger.warning("Admin created workout class: " + className);
+        // ADD LOGGER HERE FOR ADMIN CREATING WORKOUT CLASS
     }
 
     // Method to update workout class
@@ -285,21 +278,13 @@ public class AdminMenu {
         LocalTime convertedTime = getValidTime("Enter the new workout class time (e.g. 6:30PM): ");
 
         // Create new workout class with updated values
-        WorkoutClass workoutClass = new WorkoutClass(
-                workoutClassID,
-                trainerID,
-                className,
-                classDescription,
-                convertedDate,
-                convertedTime
-        );
+        WorkoutClass workoutClass = new WorkoutClass(workoutClassID, trainerID, className, classDescription, convertedDate, convertedTime);
 
         workoutClassService.updateWorkoutClass(workoutClass);
 
         System.out.println();
         System.out.println("Workout class successfully updated!");
-
-        AppLogger.warning("Admin updated workout class with ID: " + workoutClassID);
+        // ADD LOGGER HERE FOR ADMIN UPDATING WORKOUT CLASS
     }
 
     // Method to delete workout class
@@ -312,8 +297,7 @@ public class AdminMenu {
 
         System.out.println();
         System.out.println("Workout class successfully deleted!");
-
-        AppLogger.warning("Admin deleted workout class with ID: " + workoutClassID);
+        // ADD LOGGER HERE FOR ADMIN DELETING WORKOUT CLASS
     }
 
     // Helper method to validate input date
@@ -337,11 +321,7 @@ public class AdminMenu {
 
     // Helper method to validate input time
     private LocalTime getValidTime(String prompt) {
-        DateTimeFormatter parser = new DateTimeFormatterBuilder()
-                .parseCaseInsensitive()
-                .appendPattern("h:mma")
-                .toFormatter(Locale.ENGLISH);
-
+        DateTimeFormatter parser = new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("h:mma").toFormatter(Locale.ENGLISH);
         LocalTime convertedTime = null;
         boolean validTime = false;
 
@@ -357,5 +337,48 @@ public class AdminMenu {
             }
         }
         return convertedTime;
+    }
+
+    // Method to export reports to a text file
+    private void exportReports() throws SQLException {
+
+        System.out.println();
+        System.out.println("---------- EXPORT REPORT ----------");
+        System.out.println("1. Merchandise Inventory Report");
+        System.out.println("2. Membership Revenue Report");
+        System.out.println("0. Back");
+
+        System.out.print("Enter your choice: ");
+        String choice = scanner.nextLine();
+
+        switch (choice) {
+
+            case "1":
+                MerchandiseReportExporter merchandiseExporter =
+                        new MerchandiseReportExporter();
+
+                merchandiseExporter.exportReport();
+
+                System.out.println();
+                System.out.println("Merchandise report successfully exported!");
+                break;
+
+            case "2":
+                MembershipReportExporter membershipExporter =
+                        new MembershipReportExporter();
+
+                membershipExporter.exportReport();
+
+                System.out.println();
+                System.out.println("Membership report successfully exported!");
+                break;
+
+            case "0":
+                return;
+
+            default:
+                System.out.println("Invalid choice.");
+                break;
+        }
     }
 }
