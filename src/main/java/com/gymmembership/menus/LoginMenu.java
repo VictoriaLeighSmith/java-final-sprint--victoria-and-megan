@@ -20,23 +20,22 @@ public class LoginMenu {
     // Method to display Login menu - return a User object to be used in Main
     public User displayLoginMenu() throws SQLException {
         while (true) {
-            System.out.println("LOGIN/REGISTER");
+            System.out.println("---------- LOGIN/REGISTER ----------");
             System.out.println("1. Login");
             System.out.println("2. Register");
-            System.out.println("3. Exit");
+            System.out.println("0. Exit");
+            System.out.println();
 
             System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            String choice = scanner.nextLine();
 
             switch (choice) {
-                case 1:
+                case "1":
                     return loginMenu();
-                case 2:
+                case "2":
                     registerMenu();
                     break;
-                case 3:
-                    System.out.println("Exiting...");
+                case "0":
                     return null;
                 default:
                     System.out.println("Invalid option");
@@ -47,10 +46,10 @@ public class LoginMenu {
 
     // Method for user login
     private User loginMenu() throws SQLException {
-        System.out.println("Enter username: ");
+        System.out.print("Enter username: ");
         String username = scanner.nextLine();
 
-        System.out.println("Enter password: ");
+        System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
         User user = userService.loginToSystem(username, password);
@@ -59,29 +58,28 @@ public class LoginMenu {
 
     // Method for user registration
     private void registerMenu() throws SQLException {
-        System.out.println("Enter username: ");
+        System.out.print("Enter username: ");
         String username = scanner.nextLine();
 
-        System.out.println("Enter password: ");
+        System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
-        System.out.println("Enter email: ");
+        System.out.print("Enter email: ");
         String email = scanner.nextLine();
 
-        System.out.println("Enter phone number: ");
+        System.out.print("Enter phone number: ");
         String phoneNumber = scanner.nextLine();
 
-        System.out.println("Enter address: ");
+        System.out.print("Enter address: ");
         String address = scanner.nextLine();
 
-        // Think about how we can handle this so that users aren't manually inputting their role
-        System.out.println("Enter role: ");
-        String role = scanner.nextLine();
+        User user = new  User(username, password, email, phoneNumber, address);
 
-        // Maybe want to think about putting this in a try/catch? Not sure if it's necessary
-        User user = new  User(username, password, email, phoneNumber, address, role);
-        userService.saveNewUser(user);
-
-        System.out.println("Successfully registered!");
+        try {
+            userService.saveNewUser(user);
+            System.out.println("Successfully registered!");
+        } catch (IllegalArgumentException error) {
+            System.out.println(error.getMessage());
+        }
     }
 }

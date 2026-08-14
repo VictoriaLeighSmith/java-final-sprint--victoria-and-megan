@@ -1,20 +1,14 @@
 package com.gymmembership.workout;
-
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class WorkoutClassService {
 
     // DAO used to communicate with the workout_classes table
-    private WorkoutClassDAO workoutClassDao;
-
-    // Creates the DAO when the service is created
-    public WorkoutClassService() {
-        this.workoutClassDao = new WorkoutClassDAO();
-    }
+    private final WorkoutClassDAO workoutClassDao = new WorkoutClassDAO();
 
     // Validates workout class information before saving it to the database
-    public void createWorkoutClass(WorkoutClass workoutClass) {
-
+    public void createWorkoutClass(WorkoutClass workoutClass) throws SQLException {
         if (workoutClass == null) {
             throw new IllegalArgumentException("Workout class must be provided.");
         }
@@ -45,14 +39,14 @@ public class WorkoutClassService {
         workoutClassDao.createWorkoutClass(workoutClass);
     }
 
+
     // Retrieves all workout classes from the database
-    public ArrayList<WorkoutClass> getAllWorkoutClasses() {
+    public ArrayList<WorkoutClass> getAllWorkoutClasses() throws SQLException {
         return workoutClassDao.getAllWorkoutClasses();
     }
 
     // Retrieves all workout classes belonging to a specific trainer
-    public ArrayList<WorkoutClass> getAllClassesByTrainer(int trainerId) {
-
+    public ArrayList<WorkoutClass> getAllClassesByTrainer(int trainerId) throws SQLException {
         if (trainerId <= 0) {
             throw new IllegalArgumentException("Trainer ID must be greater than 0.");
         }
@@ -61,8 +55,7 @@ public class WorkoutClassService {
     }
 
     // Validates updated class information before updating the database
-    public void updateWorkoutClass(WorkoutClass workoutClass) {
-
+    public void updateWorkoutClass(WorkoutClass workoutClass) throws SQLException {
         if (workoutClass == null) {
             throw new IllegalArgumentException("Workout class must be provided.");
         }
@@ -72,8 +65,7 @@ public class WorkoutClassService {
         }
 
         // Check that the class exists before attempting to update it
-        WorkoutClass existingClass =
-                workoutClassDao.getClassByID(workoutClass.getClassId());
+        WorkoutClass existingClass = workoutClassDao.getClassByID(workoutClass.getClassId());
 
         if (existingClass == null) {
             throw new IllegalArgumentException("Workout class not found.");
@@ -105,9 +97,35 @@ public class WorkoutClassService {
         workoutClassDao.updateWorkoutClass(workoutClass);
     }
 
-    // Deletes a workout class using its class ID
-    public void deleteWorkoutClass(int classId) {
+    // Overloaded update workout class method for trainers that checks to make sure logged in user's ID is the same as the trainer ID of the class they're trying to update
+    public void updateWorkoutClass(WorkoutClass workoutClass, int trainerId) throws SQLException {
+        if (workoutClass == null) {
+            throw new IllegalArgumentException("Workout class must be provided.");
+        }
 
+        if (workoutClass.getClassId() <= 0) {
+            throw new IllegalArgumentException("Class ID must be greater than 0.");
+        }
+
+        if (trainerId <= 0) {
+            throw new IllegalArgumentException("Trainer ID must be greater than 0.");
+        }
+
+        WorkoutClass existingClass = workoutClassDao.getClassByID(workoutClass.getClassId());
+
+        if (existingClass == null) {
+            throw new IllegalArgumentException("Workout class not found.");
+        }
+
+        if (existingClass.getTrainerId() != trainerId) {
+            throw new IllegalArgumentException("You can only update your own workout classes.");
+        }
+
+        updateWorkoutClass(workoutClass);
+    }
+
+    // Deletes a workout class using its class ID
+    public void deleteWorkoutClass(int classId) throws SQLException {
         if (classId <= 0) {
             throw new IllegalArgumentException("Class ID must be greater than 0.");
         }
@@ -119,12 +137,38 @@ public class WorkoutClassService {
             throw new IllegalArgumentException("Workout class not found.");
         }
 
-        workoutClassDao.deleteWorkoutClass(classId);
+        boolean deleted = workoutClassDao.deleteWorkoutClass(classId);
+
+        if (!deleted) {
+            throw new IllegalArgumentException("Workout class could not be deleted.");
+        }
+    }
+
+    // Overloaded delete workout class method for trainers that checks to make sure logged in user's ID is the same as the trainer ID of the class they're trying to delete
+    public void deleteWorkoutClass(int classId, int trainerId) throws SQLException {
+        if (classId <= 0) {
+            throw new IllegalArgumentException("Class ID must be greater than 0.");
+        }
+
+        if (trainerId <= 0) {
+            throw new IllegalArgumentException("Trainer ID must be greater than 0.");
+        }
+
+        WorkoutClass workoutClass = workoutClassDao.getClassByID(classId);
+
+        if (workoutClass == null) {
+            throw new IllegalArgumentException("Workout class not found.");
+        }
+
+        if (workoutClass.getTrainerId() != trainerId) {
+            throw new IllegalArgumentException("You can only delete your own workout classes.");
+        }
+
+        deleteWorkoutClass(classId);
     }
 
     // Retrieves one workout class using its class ID
-    public WorkoutClass getClassByID(int classId) {
-
+    public WorkoutClass getClassByID(int classId) throws SQLException {
         if (classId <= 0) {
             throw new IllegalArgumentException("Class ID must be greater than 0.");
         }

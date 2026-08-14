@@ -10,6 +10,7 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
+        // ADD LOGGING HERE FOR PROGRAM STARTUP
 
         // Create scanner and LoginMenu objects
         Scanner scanner = new Scanner(System.in);
@@ -17,6 +18,7 @@ public class Main {
 
         try {
             while (true) {
+                // Create logged in user and display the login menu
                 User loggedInUser = loginMenu.displayLoginMenu();
 
                 if (loggedInUser == null) {
@@ -24,8 +26,10 @@ public class Main {
                     break;
                 }
 
+                // Get the logged in users role
                 String loggedInUserRole = loggedInUser.getRole().toUpperCase();
 
+                // Use the logged in user's role to display the appropriate menu
                 switch (loggedInUserRole) {
                     case "ADMIN":
                         AdminMenu adminMenu = new AdminMenu(scanner);
@@ -45,7 +49,8 @@ public class Main {
                 }
             }
         } catch (SQLException error) {
-            error.printStackTrace();
+            // ADD LOGGER HERE FOR DATABASE ERROR HERE
+            System.out.println("A database error occurred. Please try again.");
         }
 
         scanner.close();

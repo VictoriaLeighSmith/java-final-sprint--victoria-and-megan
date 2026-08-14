@@ -1,102 +1,81 @@
 package com.gymmembership.menus;
-
-import com.gymmembership.membership.Membership;
 import com.gymmembership.membership.MembershipService;
 import com.gymmembership.merchandise.Merchandise;
 import com.gymmembership.merchandise.MerchandiseService;
 import com.gymmembership.user.User;
 import com.gymmembership.workout.WorkoutClass;
 import com.gymmembership.workout.WorkoutClassService;
-
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class TrainerMenu {
 
-    private final MembershipService memberService;
-    private final MerchandiseService merchService;
-    private final WorkoutClassService workoutService;
+    private final MembershipService membershipService = new MembershipService();
+    private final MerchandiseService merchandiseService = new MerchandiseService();
+    private final WorkoutClassService workoutService = new WorkoutClassService();
     private final Scanner scanner;
 
     public TrainerMenu(Scanner scanner) {
-        this.memberService = new MembershipService();
-        this.merchService = new MerchandiseService();
-        this.workoutService = new WorkoutClassService();
         this.scanner = scanner;
     }
 
-    public void showMenu(User loggedInUser) {
-
-        int choice = -1;
-
-        while (choice != 0) {
-
-            System.out.println(" ========== TRAINER MENU ========== ");
+    public void showMenu(User loggedInUser) throws SQLException {
+        while (true) {
             System.out.println();
+            System.out.println(" ========== TRAINER MENU ========== ");
             System.out.println(" 1. Create Workout Class");
             System.out.println(" 2. Update Workout Class");
             System.out.println(" 3. Delete Workout Class");
             System.out.println(" 4. Purchase Membership");
-            System.out.println(" 5. View Membership");
-            System.out.println(" 6. View My Workout Classes");
-            System.out.println(" 7. View Merchandise");
-            System.out.println(" 0. Log Out");
+            System.out.println(" 5. View My Workout Classes");
+            System.out.println(" 6. View Merchandise");
+            System.out.println(" 7. Log Out");
 
+            System.out.println();
             System.out.print("Choose an option: ");
-            choice = scanner.nextInt();
-            scanner.nextLine();
+            String choice = scanner.nextLine();
 
             try {
-
                 switch (choice) {
-
-                    case 1:
+                    case "1":
                         createWorkoutClass(loggedInUser);
                         break;
-
-                    case 2:
-                        updateWorkoutClass();
+                    case "2":
+                        updateWorkoutClass(loggedInUser);
                         break;
-
-                    case 3:
-                        deleteClass();
+                    case "3":
+                        deleteClass(loggedInUser);
                         break;
-
-                    case 4:
+                    case "4":
                         purchaseMembership(loggedInUser);
                         break;
-
-                    case 5:
-                        viewMembership(loggedInUser);
-                        break;
-
-                    case 6:
+                    case "5":
                         viewClassesByTrainer(loggedInUser);
                         break;
-
-                    case 7:
+                    case "6":
                         browseMerchandise();
                         break;
-
-                    case 0:
+                    case "7":
                         System.out.println("Logging out...");
+                        return;
+                    default:
+                        System.out.println("Invalid choice");
                         break;
                 }
-
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+            } catch (IllegalArgumentException error) {
+                System.out.println(error.getMessage());
             }
         }
     }
 
-    private void createWorkoutClass(User loggedInUser) {
-
-        int classId = 0;
+    private void createWorkoutClass(User loggedInUser) throws SQLException {
         int trainerId = loggedInUser.getUserID();
 
         System.out.print("Enter the class name: ");
@@ -105,65 +84,25 @@ public class TrainerMenu {
         System.out.print("Enter the class description: ");
         String classDescription = scanner.nextLine();
 
-        System.out.print("Enter the class date (YYYY-MM-DD): ");
-        String dateInput = scanner.nextLine();
+        LocalDate convertedDate = getValidDate("Enter the workout class date (YYYY-MM-DD): ");
+        LocalTime convertedTime = getValidTime("Enter the workout class time (e.g. 6:30PM): ");
 
-        DateTimeFormatter dateFormatter =
-                DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        LocalDate classDate;
-
-        try {
-            classDate = LocalDate.parse(dateInput, dateFormatter);
-
-        } catch (DateTimeParseException e) {
-            System.out.println("Invalid date. Please use the format YYYY-MM-DD.");
-            return;
-        }
-
-        System.out.print("Enter the class time (ex. 2:30 PM): ");
-        String timeInput = scanner.nextLine();
-
-        DateTimeFormatter timeFormatter =
-                DateTimeFormatter.ofPattern("h:mm a");
-
-        LocalTime classTime;
-
-        try {
-            classTime = LocalTime.parse(timeInput, timeFormatter);
-
-        } catch (DateTimeParseException e) {
-            System.out.println("Invalid time. Please use the format 2:30 PM.");
-            return;
-        }
-
-        WorkoutClass newClass = new WorkoutClass(
-                classId,
-                trainerId,
-                className,
-                classDescription,
-                classDate,
-                classTime
-        );
+        WorkoutClass newClass = new WorkoutClass(trainerId, className, classDescription, convertedDate, convertedTime);
 
         workoutService.createWorkoutClass(newClass);
+        System.out.println("Successfully created workout class!");
     }
 
-    private void updateWorkoutClass() {
-
+    private void updateWorkoutClass(User loggedInUser) throws SQLException {
         System.out.print("Enter the class ID: ");
         int classId = scanner.nextInt();
         scanner.nextLine();
 
-        WorkoutClass workoutClass =
-                workoutService.getClassByID(classId);
+        WorkoutClass workoutClass = workoutService.getClassByID(classId);
 
         System.out.println("Your selected class is: " + workoutClass);
 
-        int updateChoice = -1;
-
-        while (updateChoice != 0) {
-
+        while (true) {
             System.out.println(" 1. Change Class Name");
             System.out.println(" 2. Change Description");
             System.out.println(" 3. Change Date");
@@ -171,172 +110,129 @@ public class TrainerMenu {
             System.out.println(" 5. Save Changes");
             System.out.println(" 0. Cancel");
 
+            System.out.println();
             System.out.print("Choose an update option: ");
-            updateChoice = scanner.nextInt();
-            scanner.nextLine();
+            String updateChoice = scanner.nextLine();
 
             switch (updateChoice) {
-
-                case 1:
+                case "1":
                     System.out.print("Enter new class name: ");
                     String newName = scanner.nextLine();
                     workoutClass.setClassName(newName);
                     break;
-
-                case 2:
+                case "2":
                     System.out.print("Enter new class description: ");
                     String newDesc = scanner.nextLine();
                     workoutClass.setDescription(newDesc);
                     break;
-
-                case 3:
-                    System.out.print("Enter new class date (YYYY-MM-DD): ");
-                    String dateInput = scanner.nextLine();
-
-                    DateTimeFormatter dateFormatter =
-                            DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-                    try {
-                        LocalDate newDate =
-                                LocalDate.parse(dateInput, dateFormatter);
-
-                        workoutClass.setClassDate(newDate);
-
-                    } catch (DateTimeParseException e) {
-                        System.out.println(
-                                "Invalid date. Please use the format YYYY-MM-DD."
-                        );
-                    }
-
+                case "3":
+                    LocalDate newDate = getValidDate("Enter new class date (YYYY-MM-DD): ");
+                    workoutClass.setClassDate(newDate);
                     break;
-
-                case 4:
-                    System.out.print("Enter new class time (ex. 2:30 PM): ");
-                    String timeInput = scanner.nextLine();
-
-                    DateTimeFormatter timeFormatter =
-                            DateTimeFormatter.ofPattern("h:mm a");
-
-                    try {
-                        LocalTime newTime =
-                                LocalTime.parse(timeInput, timeFormatter);
-
-                        workoutClass.setClassTime(newTime);
-
-                    } catch (DateTimeParseException e) {
-                        System.out.println(
-                                "Invalid time. Please use the format 2:30 PM."
-                        );
-                    }
-
+                case "4":
+                    LocalTime newTime = getValidTime("Enter new class time (e.g. 2:30PM): ");
+                    workoutClass.setClassTime(newTime);
                     break;
-
-                case 5:
-                    workoutService.updateWorkoutClass(workoutClass);
+                case "5":
+                    workoutService.updateWorkoutClass(workoutClass, loggedInUser.getUserID());
                     System.out.println("Workout class successfully updated!");
-                    System.out.println(workoutClass);
-                    updateChoice = 0;
-                    break;
-
-                case 0:
+                    return;
+                case "0":
+                    System.out.println("Update cancelled.");
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
                     break;
             }
         }
     }
 
-    private void deleteClass() {
-
+    private void deleteClass(User loggedInUser) throws SQLException {
         System.out.print("Enter the ID of the class you want to delete: ");
         int deleteClassID = scanner.nextInt();
         scanner.nextLine();
 
-        workoutService.deleteWorkoutClass(deleteClassID);
+        workoutService.deleteWorkoutClass(deleteClassID, loggedInUser.getUserID());
 
         System.out.println("Class successfully deleted.");
     }
 
-    private void purchaseMembership(User loggedInUser) {
+    private void purchaseMembership(User loggedInUser) throws SQLException {
+        System.out.print("Enter a membership type (Monthly, 3-Month, Annual): ");
+        String membershipType = scanner.nextLine();
 
-        int membershipId = 0;
-        int userId = loggedInUser.getUserID();
-        double price = 0;
+        membershipService.purchaseMembership(loggedInUser.getUserID(), membershipType);
 
-        System.out.print(
-                "Enter a membership type (Monthly, 3-Month, Annual): "
-        );
-
-        String memberType = scanner.nextLine();
-
-        if (!memberType.equalsIgnoreCase("Monthly")
-                && !memberType.equalsIgnoreCase("3-Month")
-                && !memberType.equalsIgnoreCase("Annual")) {
-
-            throw new IllegalArgumentException(
-                    "Membership type must be Monthly, 3-Month, or Annual."
-            );
-        }
-
-        if (memberType.equalsIgnoreCase("Monthly")) {
-            price = 49.99;
-        }
-
-        if (memberType.equalsIgnoreCase("3-Month")) {
-            price = 129.99;
-        }
-
-        if (memberType.equalsIgnoreCase("Annual")) {
-            price = 449.99;
-        }
-
-        LocalDate purchaseDate = LocalDate.now();
-
-        Membership newMembership = new Membership(
-                membershipId,
-                userId,
-                memberType,
-                price,
-                purchaseDate
-        );
-
-        memberService.createMembership(newMembership);
+        System.out.println("Membership successfully purchased!");
     }
 
-    private void viewMembership(User loggedInUser) {
+    private void viewClassesByTrainer(User loggedInUser) throws SQLException {
+        ArrayList<WorkoutClass> workoutClasses = workoutService.getAllClassesByTrainer(loggedInUser.getUserID());
 
-        ArrayList<Membership> memberships =
-                memberService.getMembershipsByUser(
-                        loggedInUser.getUserID()
-                );
-
-        for (Membership membership : memberships) {
-            System.out.println(membership);
+        if (workoutClasses.isEmpty()) {
+            System.out.println("You do not have any workout classes assigned.");
+            return;
         }
-    }
 
-    private void viewClassesByTrainer(User loggedInUser) {
-
-        ArrayList<WorkoutClass> workoutClasses =
-                workoutService.getAllClassesByTrainer(
-                        loggedInUser.getUserID()
-                );
+        System.out.println("Your Workout Classes:");
+        System.out.println();
 
         for (WorkoutClass workoutClassByTrainer : workoutClasses) {
             System.out.println(workoutClassByTrainer);
         }
     }
 
-    private void browseMerchandise() {
+    private void browseMerchandise() throws SQLException {
+        ArrayList<Merchandise> merchandise = merchandiseService.browseMerchandise();
 
-        try {
-            ArrayList<Merchandise> merchandise =
-                    merchService.browseMerchandise();
-
-            for (Merchandise item : merchandise) {
-                System.out.println(item);
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Unable to load merchandise.");
+        if (merchandise.isEmpty()) {
+            System.out.println("No merchandise available");
+            return;
         }
+
+        System.out.println("Available Merchandise:");
+        System.out.println();
+        for (Merchandise item : merchandise) {
+            System.out.println(item);
+        }
+    }
+
+    // Helper method to validate input date
+    private LocalDate getValidDate(String prompt) {
+        LocalDate convertedDate = null;
+        boolean validDate = false;
+
+        while (!validDate) {
+            System.out.print(prompt);
+            String classDate = scanner.nextLine();
+
+            try {
+                convertedDate = LocalDate.parse(classDate);
+                validDate = true;
+            } catch (DateTimeParseException error) {
+                System.out.println("Invalid date format!");
+            }
+        }
+        return convertedDate;
+    }
+
+    // Helper method to validate input time
+    private LocalTime getValidTime(String prompt) {
+        DateTimeFormatter parser = new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("h:mma").toFormatter(Locale.ENGLISH);
+        LocalTime convertedTime = null;
+        boolean validTime = false;
+
+        while (!validTime) {
+            System.out.print(prompt);
+            String classTime = scanner.nextLine();
+
+            try {
+                convertedTime = LocalTime.parse(classTime, parser);
+                validTime = true;
+            } catch (DateTimeParseException error) {
+                System.out.println("Invalid time format!");
+            }
+        }
+        return convertedTime;
     }
 }

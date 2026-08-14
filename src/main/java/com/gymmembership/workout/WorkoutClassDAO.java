@@ -11,268 +11,133 @@ import java.sql.SQLException;
 public class WorkoutClassDAO {
 
     // Inserts a new workout class into the workout_classes table
-    public void createWorkoutClass(WorkoutClass workoutClass) {
+    public void createWorkoutClass(WorkoutClass workoutClass) throws SQLException {
+        String query = "INSERT INTO workout_classes (trainer_id, class_name, description, class_date, class_time) VALUES (?, ?, ?, ?, ?)";
 
-        String query = "INSERT INTO workout_classes "
-                + "(trainer_id, class_name, description, class_date, class_time) "
-                + "VALUES (?, ?, ?, ?, ?)";
-
-        try {
-            Connection con = DatabaseConnection.getConnection();
-            PreparedStatement statement = con.prepareStatement(query);
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement statement = con.prepareStatement(query)) {
 
             // Set the values for the new workout class
-            statement.setInt(
-                    1,
-                    workoutClass.getTrainerId());
+            statement.setInt(1, workoutClass.getTrainerId());
+            statement.setString(2, workoutClass.getClassName());
+            statement.setString(3, workoutClass.getDescription());
+            statement.setDate(4, java.sql.Date.valueOf(workoutClass.getClassDate()));
+            statement.setTime(5, java.sql.Time.valueOf(workoutClass.getClassTime()));
 
-            statement.setString(
-                    2,
-                    workoutClass.getClassName());
-
-            statement.setString(
-                    3,
-                    workoutClass.getDescription());
-
-            statement.setDate(
-                    4,
-                    java.sql.Date.valueOf(workoutClass.getClassDate()));
-
-            statement.setTime(
-                    5,
-                    java.sql.Time.valueOf(workoutClass.getClassTime()));
-
-            statement.execute();
-
-            statement.close();
-            con.close();
-
-            System.out.println(
-                    "Workout class saved to database.");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            statement.executeUpdate();
         }
     }
 
     // Retrieves all workout classes from the database
-    public ArrayList<WorkoutClass> getAllWorkoutClasses() {
-
-        ArrayList<WorkoutClass> workoutClasses = new ArrayList<>();
-
+    public ArrayList<WorkoutClass> getAllWorkoutClasses() throws SQLException {
         String query = "SELECT * FROM workout_classes";
 
-        try {
-            Connection con = DatabaseConnection.getConnection();
-            PreparedStatement statement = con.prepareStatement(query);
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement statement = con.prepareStatement(query)) {
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                ArrayList<WorkoutClass> workoutClasses = new ArrayList<>();
 
-            // Convert each database row into a WorkoutClass object
-            while (rs.next()) {
-                int classId = rs.getInt("class_id");
-                int trainerId = rs.getInt("trainer_id");
-                String className = rs.getString("class_name");
-                String description = rs.getString("description");
-                java.sql.Date classDate = rs.getDate("class_date");
-                java.sql.Time classTime = rs.getTime("class_time");
+                while (resultSet.next()) {
+                    WorkoutClass workoutClass = buildWorkoutClassObject(resultSet);
+                    workoutClasses.add(workoutClass);
+                }
 
-                WorkoutClass newClass = new WorkoutClass(
-                        classId,
-                        trainerId,
-                        className,
-                        description,
-                        classDate.toLocalDate(),
-                        classTime.toLocalTime()
-                );
-
-                // Add the object to the list that will be returned
-                workoutClasses.add(newClass);
+                return workoutClasses;
             }
-
-            rs.close();
-            statement.close();
-            con.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-
-        return workoutClasses;
     }
 
     // Retrieves all workout classes assigned to a specific trainer
-    public ArrayList<WorkoutClass> getAllClassesByTrainer(int trainerId) {
-
-        ArrayList<WorkoutClass> workoutClassesByTrainer = new ArrayList<>();
-
+    public ArrayList<WorkoutClass> getAllClassesByTrainer(int trainerId) throws SQLException {
         String query = "SELECT * FROM workout_classes WHERE trainer_id = ?";
 
-        try {
-            Connection con = DatabaseConnection.getConnection();
-            PreparedStatement statement = con.prepareStatement(query);
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement statement = con.prepareStatement(query)) {
 
             // Use the provided trainer ID to filter the query
             statement.setInt(1, trainerId);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                ArrayList<WorkoutClass> workoutClassesByTrainer = new ArrayList<>();
 
-            // Convert each matching database row into a WorkoutClass object
-            while (rs.next()) {
-                int classId = rs.getInt("class_id");
-                int classTrainerId = rs.getInt("trainer_id");
-                String className = rs.getString("class_name");
-                String description = rs.getString("description");
-                java.sql.Date classDate = rs.getDate("class_date");
-                java.sql.Time classTime = rs.getTime("class_time");
+                while (resultSet.next()) {
+                    WorkoutClass workoutClass = buildWorkoutClassObject(resultSet);
+                    workoutClassesByTrainer.add(workoutClass);
+                }
 
-                WorkoutClass newClass = new WorkoutClass(
-                        classId,
-                        classTrainerId,
-                        className,
-                        description,
-                        classDate.toLocalDate(),
-                        classTime.toLocalTime()
-                );
-
-                workoutClassesByTrainer.add(newClass);
+                return workoutClassesByTrainer;
             }
-
-            rs.close();
-            statement.close();
-            con.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-
-        return workoutClassesByTrainer;
     }
 
     // Updates an existing workout class using its class ID
-    public void updateWorkoutClass(WorkoutClass workoutClass) {
+    public void updateWorkoutClass(WorkoutClass workoutClass) throws SQLException {
+        String query = "UPDATE workout_classes SET trainer_id = ?, class_name = ?, description = ?, class_date = ?, class_time = ? WHERE class_id = ?";
 
-        String query = "UPDATE workout_classes "
-                + "SET trainer_id = ?, class_name = ?, description = ?, class_date = ?, class_time = ? "
-                + "WHERE class_id = ?";
-
-        try {
-            Connection con = DatabaseConnection.getConnection();
-            PreparedStatement statement = con.prepareStatement(query);
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement statement = con.prepareStatement(query)) {
 
             // Set the updated values for the workout class
-            statement.setInt(
-                    1,
-                    workoutClass.getTrainerId());
-
-            statement.setString(
-                    2,
-                    workoutClass.getClassName());
-
-            statement.setString(
-                    3,
-                    workoutClass.getDescription());
-
-            statement.setDate(
-                    4,
-                    java.sql.Date.valueOf(workoutClass.getClassDate()));
-
-            statement.setTime(
-                    5,
-                    java.sql.Time.valueOf(workoutClass.getClassTime()));
+            statement.setInt(1, workoutClass.getTrainerId());
+            statement.setString(2, workoutClass.getClassName());
+            statement.setString(3, workoutClass.getDescription());
+            statement.setDate(4, java.sql.Date.valueOf(workoutClass.getClassDate()));
+            statement.setTime(5, java.sql.Time.valueOf(workoutClass.getClassTime()));
 
             // Use the class ID to determine which database row to update
-            statement.setInt(
-                    6,
-                    workoutClass.getClassId());
+            statement.setInt(6, workoutClass.getClassId());
 
-            statement.execute();
-
-            statement.close();
-            con.close();
-
-            System.out.println(
-                    "Workout updated successfully.");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            statement.executeUpdate();
         }
     }
 
     // Deletes a workout class from the database using its class ID
-    public void deleteWorkoutClass(int classId) {
+    public boolean deleteWorkoutClass(int classId) throws SQLException {
+        String query = "DELETE FROM workout_classes WHERE class_id = ?";
 
-        String query = "DELETE FROM workout_classes "
-                + "WHERE class_id = ?";
-
-        try {
-            Connection con = DatabaseConnection.getConnection();
-            PreparedStatement statement = con.prepareStatement(query);
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement statement = con.prepareStatement(query)) {
 
             // Specify which workout class should be deleted
-            statement.setInt(
-                    1,
-                    classId);
+            statement.setInt(1, classId);
 
-            statement.execute();
+            int rowsDeleted = statement.executeUpdate();
 
-            statement.close();
-            con.close();
-
-            System.out.println(
-                    "Workout deleted successfully.");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            return rowsDeleted > 0;
         }
     }
 
     // Retrieves a single workout class using its class ID
-    public WorkoutClass getClassByID(int classId) {
+    public WorkoutClass getClassByID(int classId) throws SQLException {
+        String query = "SELECT * FROM workout_classes WHERE class_id = ?";
 
-        WorkoutClass workoutClass = null;
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement statement = con.prepareStatement(query)) {
 
-        String query = "SELECT * FROM workout_classes "
-                + "WHERE class_id = ?";
+            statement.setInt(1, classId);
 
-        try {
-            Connection con = DatabaseConnection.getConnection();
-            PreparedStatement statement = con.prepareStatement(query);
-
-            statement.setInt(
-                    1,
-                    classId);
-
-            ResultSet rs = statement.executeQuery();
-
-            // If the class exists, convert the database row into a WorkoutClass object
-            if (rs.next()) {
-                int foundClassId = rs.getInt("class_id");
-                int trainerId = rs.getInt("trainer_id");
-                String className = rs.getString("class_name");
-                String description = rs.getString("description");
-                java.sql.Date classDate = rs.getDate("class_date");
-                java.sql.Time classTime = rs.getTime("class_time");
-
-                workoutClass = new WorkoutClass(
-                        foundClassId,
-                        trainerId,
-                        className,
-                        description,
-                        classDate.toLocalDate(),
-                        classTime.toLocalTime()
-                );
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    WorkoutClass workoutClass = buildWorkoutClassObject(resultSet);
+                    return workoutClass;
+                }
             }
-
-            rs.close();
-            statement.close();
-            con.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+        return null;
+    }
 
-        // Returns the WorkoutClass if found, otherwise returns null
+    // Helper method to build workout class object
+    private WorkoutClass buildWorkoutClassObject(ResultSet resultSet) throws SQLException {
+        WorkoutClass workoutClass = new WorkoutClass();
+
+        workoutClass.setClassId(resultSet.getInt("class_id"));
+        workoutClass.setTrainerId(resultSet.getInt("trainer_id"));
+        workoutClass.setClassName(resultSet.getString("class_name"));
+        workoutClass.setDescription(resultSet.getString("description"));
+        workoutClass.setClassDate(resultSet.getDate("class_date").toLocalDate());
+        workoutClass.setClassTime(resultSet.getTime("class_time").toLocalTime());
+
         return workoutClass;
     }
 }
