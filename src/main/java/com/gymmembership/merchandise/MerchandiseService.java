@@ -9,6 +9,9 @@ public class MerchandiseService {
 
     // Method to save a new product
     public void addMerchandise(Merchandise merchandise) throws SQLException {
+        if (merchandise == null) {
+            throw new IllegalArgumentException("Merchandise must be provided");
+        }
 
         // Validate that user provided all necessary info
         if (merchandise.getProductName() == null || merchandise.getProductName().isBlank()) {
@@ -32,7 +35,6 @@ public class MerchandiseService {
 
     // Method to change product price
     public void changeProductPrice(int merchandiseID, double newPrice) throws SQLException {
-
         Merchandise merchandise = merchandiseDAO.getMerchandiseByID(merchandiseID);
 
         // Validate that user input is valid
@@ -53,7 +55,6 @@ public class MerchandiseService {
 
     // Method to restock merchandise - we aren't required to remove stock as per requirements but we can add that later if we need
     public void addStock(int merchandiseID, int quantity) throws SQLException {
-
         Merchandise merchandise = merchandiseDAO.getMerchandiseByID(merchandiseID);
 
         // Validate that user input is valid
@@ -77,7 +78,6 @@ public class MerchandiseService {
 
     // Method to calculate the total value of all inventory
     public double calculateInventoryValue() throws SQLException {
-
         // Get all merchandise
         ArrayList<Merchandise> allMerchandise = merchandiseDAO.getAllMerchandise();
 

@@ -48,6 +48,25 @@ public class UserDAO {
         return null;
     }
 
+    // Method to get user by email
+    public User getByEmail(String email) throws SQLException {
+        String query = "SELECT * FROM users WHERE email = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, email);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return buildNewUserObject(resultSet);
+                }
+            }
+        }
+
+        return null;
+    }
+
     // Method to get all users from the DB
     public ArrayList<User> getAllUsersFromDB() throws SQLException {
 
@@ -83,10 +102,27 @@ public class UserDAO {
             deleteStatement.setInt(1, userID);
 
             // Store the result of the update in a variable
-            int rowsUpdated = deleteStatement.executeUpdate();
+            int rowsDeleted = deleteStatement.executeUpdate();
 
             // Use the result to return a boolean value. The service class will handle the result.
-            return rowsUpdated > 0;
+            return rowsDeleted > 0;
+        }
+    }
+
+    // Method to check for users in the DB. This allows us to create an admin user as the first user if there are no users in the database
+    public boolean hasAnyUsers() throws SQLException {
+        String query = "SELECT COUNT(*) AS user_count FROM users";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            if (resultSet.next()) {
+                int userCount = resultSet.getInt("user_count");
+                return userCount > 0;
+            }
+
+            return false;
         }
     }
 

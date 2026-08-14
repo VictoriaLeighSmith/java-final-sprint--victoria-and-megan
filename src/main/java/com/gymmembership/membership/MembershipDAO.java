@@ -1,8 +1,5 @@
 package com.gymmembership.membership;
-
 import com.gymmembership.database.DatabaseConnection;
-import com.gymmembership.workout.WorkoutClass;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,133 +9,75 @@ import java.util.ArrayList;
 public class MembershipDAO {
 
     // Inserts a new membership into the memberships table
-    public void createMembership(Membership membership) {
+    public void createMembership(Membership membership) throws SQLException {
+        String query = "INSERT INTO memberships (user_id, membership_type, price, purchase_date) VALUES (?, ?, ?, ?)";
 
-        String query = "INSERT INTO memberships "
-                + "(user_id, membership_type, price, purchase_date) "
-                + "VALUES (?, ?, ?, ?)";
-
-        try {
-            Connection con = DatabaseConnection.getConnection();
-            PreparedStatement statement = con.prepareStatement(query);
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement statement = con.prepareStatement(query)) {
 
             // Set the values for the new membership
-            statement.setInt(
-                    1,
-                    membership.getUserId());
-
-            statement.setString(
-                    2,
-                    membership.getMembershipType());
-
-            statement.setDouble(
-                    3,
-                    membership.getPrice());
-
-            statement.setDate(
-                    4,
-                    java.sql.Date.valueOf(membership.getPurchaseDate()));
-
+            statement.setInt(1, membership.getUserId());
+            statement.setString(2, membership.getMembershipType());
+            statement.setDouble(3, membership.getPrice());
+            statement.setDate(4, java.sql.Date.valueOf(membership.getPurchaseDate()));
 
             statement.execute();
-
-            statement.close();
-            con.close();
-
-            System.out.println(
-                    "Membership saved to database.");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
     // Retrieves all memberships from the database
-    public ArrayList<Membership> getAllMemberships() {
-
-        ArrayList<Membership> allMemberships = new ArrayList<>();
-
+    public ArrayList<Membership> getAllMemberships() throws SQLException {
         String query = "SELECT * FROM memberships";
 
-        try {
-            Connection con = DatabaseConnection.getConnection();
-            PreparedStatement statement = con.prepareStatement(query);
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement statement = con.prepareStatement(query)) {
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                ArrayList<Membership> allMemberships = new ArrayList<>();
 
-            // Convert each database row into a Membership object
-            while (rs.next()) {
-                int membershipId = rs.getInt("membership_id");
-                int userId = rs.getInt("user_id");
-                String membershipType = rs.getString("membership_type");
-                double price = rs.getDouble("price");
-                java.sql.Date purchaseDate = rs.getDate("purchase_date");
-
-                Membership newMembership = new Membership(
-                        membershipId,
-                        userId,
-                        membershipType,
-                        price,
-                        purchaseDate.toLocalDate()
-                );
-
-                // Add the object to the list that will be returned
-                allMemberships.add(newMembership);
+                while (resultSet.next()) {
+                    Membership membership = buildMembershipObject(resultSet);
+                    allMemberships.add(membership);
+                }
+                return allMemberships;
             }
-
-            rs.close();
-            statement.close();
-            con.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-
-        return allMemberships;
     }
 
     // Retrieves all memberships purchased by a specific user
-    public ArrayList<Membership> getMembershipsByUser(int userId) {
-
-        ArrayList<Membership> membershipsByUser = new ArrayList<>();
-
+    public ArrayList<Membership> getMembershipsByUser(int userId) throws SQLException {
         String query = "SELECT * FROM memberships WHERE user_id = ?";
 
-        try {
-            Connection con = DatabaseConnection.getConnection();
-            PreparedStatement statement = con.prepareStatement(query);
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement statement = con.prepareStatement(query)) {
 
             // Use the provided user ID to filter the query
             statement.setInt(1, userId);
 
-            ResultSet rs = statement.executeQuery();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                ArrayList<Membership> membershipsByUser = new ArrayList<>();
 
-            // Convert each matching database row into a Membership object
-            while (rs.next()) {
-                int membershipId = rs.getInt("membership_id");
-                String membershipType = rs.getString("membership_type");
-                double price = rs.getDouble("price");
-                java.sql.Date purchaseDate = rs.getDate("purchase_date");
+                while (resultSet.next()) {
+                    Membership membership = buildMembershipObject(resultSet);
+                    membershipsByUser.add(membership);
+                }
 
-                Membership singleMembership = new Membership(
-                        membershipId,
-                        userId,
-                        membershipType,
-                        price,
-                        purchaseDate.toLocalDate()
-                );
-
-                membershipsByUser.add(singleMembership);
+                return membershipsByUser;
             }
-
-            rs.close();
-            statement.close();
-            con.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+    }
 
-        return membershipsByUser;
+    // Helper method to build a membership object
+    private Membership buildMembershipObject (ResultSet resultSet)  throws SQLException {
+        Membership membership = new Membership();
+
+        membership.setMembershipId(resultSet.getInt("membership_id"));
+        membership.setUserId(resultSet.getInt("user_id"));
+        membership.setMembershipType(resultSet.getString("membership_type"));
+        membership.setPrice(resultSet.getDouble("price"));
+        membership.setPurchaseDate(resultSet.getDate("purchase_date").toLocalDate());
+
+        return membership;
     }
 }
+
