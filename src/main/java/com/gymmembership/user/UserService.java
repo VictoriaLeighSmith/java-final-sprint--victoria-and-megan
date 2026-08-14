@@ -2,6 +2,7 @@ package com.gymmembership.user;
 import org.mindrot.jbcrypt.BCrypt;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import com.gymmembership.logging.AppLogger;
 
 public class UserService {
 
@@ -75,7 +76,7 @@ public class UserService {
         User user = userDAO.getByUsername(username);
 
         if (user == null || !verifyPassword(password, user.getPassword())) {
-            // ADD LOGGER HERE TO LOG FAILED LOGIN ATTEMPT
+            AppLogger.warning("Login failed for user " + username);
             System.out.println("Invalid username or password");
             return null;
         }
