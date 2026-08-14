@@ -10,24 +10,24 @@ public class MerchandiseService {
     // Method to save a new product
     public void addMerchandise(Merchandise merchandise) throws SQLException {
         if (merchandise == null) {
-            throw new IllegalArgumentException("Merchandise must be provided");
+            throw new IllegalArgumentException("Merchandise must be provided.");
         }
 
         // Validate that user provided all necessary info
         if (merchandise.getProductName() == null || merchandise.getProductName().isBlank()) {
-            throw new IllegalArgumentException("Product name must be provided");
+            throw new IllegalArgumentException("Product name must be provided.");
         }
 
         if (merchandise.getType() == null || merchandise.getType().isBlank()) {
-            throw new IllegalArgumentException("Product type must be provided");
+            throw new IllegalArgumentException("Product type must be provided.");
         }
 
         if (merchandise.getPrice() <= 0) {
-            throw new IllegalArgumentException("Price must be greater than 0");
+            throw new IllegalArgumentException("Price must be greater than 0.");
         }
 
         if (merchandise.getStockLevel() < 0) {
-            throw new IllegalArgumentException("Stock level can't be a negative number");
+            throw new IllegalArgumentException("Stock level can't be a negative number.");
         }
 
         merchandiseDAO.saveNewMerchandiseToDatabase(merchandise);
@@ -39,17 +39,17 @@ public class MerchandiseService {
 
         // Validate that user input is valid
         if (merchandise == null) {
-            throw new IllegalArgumentException("Merchandise with ID " + merchandiseID + " does not exist");
+            throw new IllegalArgumentException("Merchandise with ID " + merchandiseID + " does not exist.");
         }
 
         if (newPrice <= 0) {
-            throw new IllegalArgumentException("Price must be greater than 0");
+            throw new IllegalArgumentException("Price must be greater than 0.");
         }
 
         boolean updatedMerchandise = merchandiseDAO.updateProductPrice(merchandiseID, newPrice);
 
         if (!updatedMerchandise) {
-            throw new IllegalStateException("Failed to update merchandise with ID " + merchandiseID);
+            throw new IllegalStateException("Failed to update merchandise with ID " + merchandiseID + ".");
         }
     }
 
@@ -59,11 +59,11 @@ public class MerchandiseService {
 
         // Validate that user input is valid
         if (merchandise == null) {
-            throw new IllegalArgumentException("Merchandise with ID " + merchandiseID + " does not exist");
+            throw new IllegalArgumentException("Merchandise with ID " + merchandiseID + " does not exist.");
         }
 
         if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity to add must be greater than 0");
+            throw new IllegalArgumentException("Quantity to add must be greater than 0.");
         }
 
         // Calculate new stock quantity
@@ -72,7 +72,7 @@ public class MerchandiseService {
         boolean updatedMerchandise = merchandiseDAO.updateProductStockLevel(merchandiseID, newQuantity);
 
         if (!updatedMerchandise) {
-            throw new IllegalStateException("Failed to update merchandise with ID " + merchandiseID);
+            throw new IllegalStateException("Failed to update merchandise with ID " + merchandiseID + ".");
         }
     }
 

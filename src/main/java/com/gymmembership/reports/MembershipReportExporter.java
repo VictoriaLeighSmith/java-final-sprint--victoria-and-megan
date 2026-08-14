@@ -19,7 +19,7 @@ public class MembershipReportExporter {
         }
     }
 
-    public void exportReport() throws SQLException {
+    public void exportReport() throws SQLException, IOException {
 
         createReportsFolder();
 
@@ -39,7 +39,7 @@ public class MembershipReportExporter {
                 writer.write("Membership ID: " + membership.getMembershipId() + "\n");
                 writer.write("User ID: " + membership.getUserId() + "\n");
                 writer.write("Membership Type: " + membership.getMembershipType() + "\n");
-                writer.write("Price: $" + membership.getPrice() + "\n");
+                writer.write(String.format("Price: $%.2f%n", membership.getPrice()));
                 writer.write("Purchase Date: " + membership.getPurchaseDate() + "\n");
                 writer.write("-------------------------\n");
 
@@ -47,10 +47,8 @@ public class MembershipReportExporter {
             }
 
             writer.write("\n");
-            writer.write("Total Membership Revenue: $" + totalRevenue + "\n");
+            writer.write(String.format("Total Revenue: $%.2f%n", totalRevenue));
 
-        } catch (IOException e) {
-            System.out.println("Unable to create membership report.");
         }
     }
 }

@@ -67,6 +67,25 @@ public class UserDAO {
         return null;
     }
 
+    // Method to get user by userID from the DB
+    public User getByID(int id) throws SQLException {
+        String query = "SELECT * FROM users WHERE user_id = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, id);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return buildNewUserObject(resultSet);
+                }
+            }
+        }
+        return null;
+    }
+
+
     // Method to get all users from the DB
     public ArrayList<User> getAllUsersFromDB() throws SQLException {
 

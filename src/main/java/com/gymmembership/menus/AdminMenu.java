@@ -1,5 +1,6 @@
 package com.gymmembership.menus;
 
+import com.gymmembership.logging.AppLogger;
 import com.gymmembership.membership.MembershipService;
 import com.gymmembership.merchandise.Merchandise;
 import com.gymmembership.merchandise.MerchandiseService;
@@ -10,6 +11,7 @@ import com.gymmembership.workout.WorkoutClassService;
 import com.gymmembership.reports.MembershipReportExporter;
 import com.gymmembership.reports.MerchandiseReportExporter;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -37,16 +39,17 @@ public class AdminMenu {
             System.out.println();
             System.out.println("---------- ADMIN MENU ----------");
             System.out.println("1. Display All Users");
-            System.out.println("2. Delete User");
-            System.out.println("3. Get Total Annual Revenue");
-            System.out.println("4. Add New Merchandise");
-            System.out.println("5. Update Merchandise Price");
-            System.out.println("6. Restock Merchandise");
-            System.out.println("7. View All Merchandise and Total Value");
-            System.out.println("8. Create New Workout Class");
-            System.out.println("9. Update Workout Class");
-            System.out.println("10. Delete Workout Class");
-            System.out.println("11. Export Reports to File");
+            System.out.println("2. Add Trainer");
+            System.out.println("3. Delete User");
+            System.out.println("4. Get Total Annual Revenue");
+            System.out.println("5. Add New Merchandise");
+            System.out.println("6. Update Merchandise Price");
+            System.out.println("7. Restock Merchandise");
+            System.out.println("8. View All Merchandise and Total Value");
+            System.out.println("9. Create New Workout Class");
+            System.out.println("10. Update Workout Class");
+            System.out.println("11. Delete Workout Class");
+            System.out.println("12. Export Reports to File");
             System.out.println("0. Logout");
 
             System.out.println();
@@ -59,33 +62,36 @@ public class AdminMenu {
                         displayAllUsers();
                         break;
                     case "2":
-                        deleteUser();
+                        addTrainer();
                         break;
                     case "3":
-                        displayTotalAnnualRevenue();
+                        deleteUser(loggedInUser);
                         break;
                     case "4":
-                        addNewMerchandiseItem();
+                        displayTotalAnnualRevenue();
                         break;
                     case "5":
-                        updateMerchandisePrice();
+                        addNewMerchandiseItem();
                         break;
                     case "6":
-                        restockMerchandise();
+                        updateMerchandisePrice();
                         break;
                     case "7":
-                        viewMerchandiseAndTotalValue();
+                        restockMerchandise();
                         break;
                     case "8":
-                        createWorkoutClass();
+                        viewMerchandiseAndTotalValue();
                         break;
                     case "9":
-                        updateWorkoutClass();
+                        createWorkoutClass();
                         break;
                     case "10":
-                        deleteWorkoutClass();
+                        updateWorkoutClass();
                         break;
                     case "11":
+                        deleteWorkoutClass();
+                        break;
+                    case "12":
                         exportReports();
                         break;
                     case "0":
@@ -96,7 +102,12 @@ public class AdminMenu {
                         break;
                 }
             } catch (IllegalArgumentException | IllegalStateException error) {
+                System.out.println();
                 System.out.println(error.getMessage());
+            } catch (IOException error) {
+                AppLogger.warning("File export error: " + error.getMessage());
+                System.out.println();
+                System.out.println("Unable to export report. Please try again.");
             }
         }
     }
@@ -107,11 +118,11 @@ public class AdminMenu {
 
         if (allUsers.isEmpty()) {
             System.out.println();
-            System.out.println("No users found");
+            System.out.println("No users found.");
             return;
         }
 
-        // We'll need to fix this output once we start testing. Not bothering with it until I can see it.
+        System.out.println();
         System.out.println("All Current Users:");
         System.out.println();
 
@@ -122,28 +133,61 @@ public class AdminMenu {
             System.out.println("Phone Number: " + user.getPhoneNumber());
             System.out.println("Address: " + user.getAddress());
             System.out.println("Role: " + user.getRole());
-            System.out.println("-".repeat(20));
+            System.out.println("-".repeat(30));
         }
     }
 
+    // Method to add new trainer to the system
+    private void addTrainer() throws SQLException {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+
+        System.out.print("Enter phone number: ");
+        String phoneNumber = scanner.nextLine();
+
+        System.out.print("Enter address: ");
+        String address = scanner.nextLine();
+
+        User trainer = new User(username, password, email, phoneNumber, address);
+
+        userService.saveNewTrainer(trainer);
+
+        System.out.println();
+        System.out.println("Trainer successfully created!");
+
+        AppLogger.warning("Admin created trainer account: " + username);
+    }
+
     // Method to delete users from the system
-    private void deleteUser() throws SQLException {
+    private void deleteUser(User loggedInUser) throws SQLException {
         System.out.print("Enter the ID of the user you want to delete: ");
-        int userID  = scanner.nextInt();
-        scanner.nextLine();
+        String userIDInput = scanner.nextLine();
+        int userID = Integer.parseInt(userIDInput);
+
+        // Check to make sure the user isn't trying to nuke their own admin account. Could cause issues if they're the only admin in the system.
+        if (userID == loggedInUser.getUserID()) {
+            throw new IllegalArgumentException("You can't delete your own admin account.");
+        }
 
         userService.deleteUser(userID);
 
         System.out.println();
         System.out.println("User successfully deleted!");
-        // ADD LOGGER HERE FOR ADMIN DELETING USER
+
+        AppLogger.warning("Admin deleted user: " + userID);
     }
 
     // Method to track total annual membership revenue
     private void displayTotalAnnualRevenue() throws SQLException {
         System.out.print("Enter the year for total annual revenue: ");
-        int year = scanner.nextInt();
-        scanner.nextLine();
+        String yearInput = scanner.nextLine();
+        int year = Integer.parseInt(yearInput);
 
         double totalAnnualRevenue = membershipService.getTotalAnnualRevenue(year);
 
@@ -158,52 +202,58 @@ public class AdminMenu {
         System.out.print("Enter the type of merchandise item: ");
         String type = scanner.nextLine();
 
-        System.out.print("Enter the price of the  merchandise item: ");
-        double price = scanner.nextDouble();
-        scanner.nextLine();
+        System.out.print("Enter the price of the merchandise item: ");
+        String priceInput = scanner.nextLine();
+        double price = Double.parseDouble(priceInput);
 
         System.out.print("Enter the quantity of the merchandise item: ");
-        int stockLevel = scanner.nextInt();
-        scanner.nextLine();
+        String stockLevelInput = scanner.nextLine();
+        int stockLevel = Integer.parseInt(stockLevelInput);
 
         Merchandise merchandise = new Merchandise(productName, type, price, stockLevel);
 
         merchandiseService.addMerchandise(merchandise);
-        // ADD LOGGER HERE FOR ADMIN ADDING NEW MERCH ITEM
+
+        System.out.println();
+        System.out.println("Merchandise successfully added!");
+
+        AppLogger.warning("Admin added new merchandise item: " + productName);
     }
 
     // Method to change merchandise item's price
     private void updateMerchandisePrice() throws SQLException {
         System.out.print("Enter the ID of the merchandise item: ");
-        int merchandiseID = scanner.nextInt();
-        scanner.nextLine();
+        String merchandiseIDInput = scanner.nextLine();
+        int merchandiseID = Integer.parseInt(merchandiseIDInput);
 
         System.out.print("Enter the new price of the merchandise item: ");
-        double merchandisePrice = scanner.nextDouble();
-        scanner.nextLine();
+        String merchandisePriceInput = scanner.nextLine();
+        double merchandisePrice = Double.parseDouble(merchandisePriceInput);
 
         merchandiseService.changeProductPrice(merchandiseID, merchandisePrice);
 
         System.out.println();
         System.out.println("Merchandise price updated successfully!");
-        // ADD LOGGER HERE FOR ADMIN CHANGING ITEM PRICE
+
+        AppLogger.warning("Admin changed price for item: " + merchandiseID);
     }
 
     // Method to restock merchandise
     private void restockMerchandise() throws SQLException {
         System.out.print("Enter the ID of the merchandise item: ");
-        int merchandiseID = scanner.nextInt();
-        scanner.nextLine();
+        String merchandiseIDInput = scanner.nextLine();
+        int merchandiseID = Integer.parseInt(merchandiseIDInput);
 
         System.out.print("Enter the quantity to add to merchandise stock: ");
-        int quantity = scanner.nextInt();
-        scanner.nextLine();
+        String quantityInput = scanner.nextLine();
+        int quantity = Integer.parseInt(quantityInput);
 
         merchandiseService.addStock(merchandiseID, quantity);
 
         System.out.println();
         System.out.println("Merchandise stock added successfully!");
-        // ADD LOGGER HERE FOR ADMIN ADDING STOCK TO MERCH
+
+        AppLogger.warning("Admin added merchandise stock for item: " + merchandiseID);
     }
 
     // Method to view merchandise stock and total value
@@ -216,16 +266,17 @@ public class AdminMenu {
             return;
         }
 
+        System.out.println();
         System.out.println("All Merchandise Items:");
+        System.out.println();
 
         for (Merchandise merchandise : allMerchandise) {
-            System.out.println();
             System.out.println("Merchandise ID: " + merchandise.getMerchandiseID());
             System.out.println("Merchandise Name: " + merchandise.getProductName());
             System.out.println("Merchandise Type: " + merchandise.getType());
             System.out.printf("Merchandise Price: $%.2f%n", merchandise.getPrice());
             System.out.println("Merchandise Stock Level: " + merchandise.getStockLevel());
-            System.out.println("-".repeat(20));
+            System.out.println("-".repeat(30));
         }
 
         double totalValue = merchandiseService.calculateInventoryValue();
@@ -237,8 +288,8 @@ public class AdminMenu {
     // Method to create a workout class
     private void createWorkoutClass() throws SQLException {
         System.out.print("Enter the trainer ID for the workout class: ");
-        int trainerID = scanner.nextInt();
-        scanner.nextLine();
+        String trainerIDInput = scanner.nextLine();
+        int trainerID = Integer.parseInt(trainerIDInput);
 
         System.out.print("Enter the workout class name: ");
         String className = scanner.nextLine();
@@ -251,22 +302,24 @@ public class AdminMenu {
 
         // Create a new workout class with the user input
         WorkoutClass workoutClass = new WorkoutClass(trainerID, className, classDescription, convertedDate, convertedTime);
+
         workoutClassService.createWorkoutClass(workoutClass);
 
         System.out.println();
         System.out.println("Workout class successfully created!");
-        // ADD LOGGER HERE FOR ADMIN CREATING WORKOUT CLASS
+
+        AppLogger.warning("Admin created workout class: " + className);
     }
 
     // Method to update workout class
     private void updateWorkoutClass() throws SQLException {
         System.out.print("Enter the workout class ID you wish to update: ");
-        int workoutClassID = scanner.nextInt();
-        scanner.nextLine();
+        String workoutClassIDInput = scanner.nextLine();
+        int workoutClassID = Integer.parseInt(workoutClassIDInput);
 
         System.out.print("Enter the new trainer ID: ");
-        int trainerID = scanner.nextInt();
-        scanner.nextLine();
+        String trainerIDInput = scanner.nextLine();
+        int trainerID = Integer.parseInt(trainerIDInput);
 
         System.out.print("Enter the new workout class name: ");
         String className = scanner.nextLine();
@@ -284,20 +337,22 @@ public class AdminMenu {
 
         System.out.println();
         System.out.println("Workout class successfully updated!");
-        // ADD LOGGER HERE FOR ADMIN UPDATING WORKOUT CLASS
+
+        AppLogger.warning("Admin updated workout class with ID: " + workoutClassID);
     }
 
     // Method to delete workout class
     private void deleteWorkoutClass() throws SQLException {
         System.out.print("Enter the workout class ID to delete: ");
-        int workoutClassID = scanner.nextInt();
-        scanner.nextLine();
+        String workoutClassIDInput = scanner.nextLine();
+        int workoutClassID = Integer.parseInt(workoutClassIDInput);
 
         workoutClassService.deleteWorkoutClass(workoutClassID);
 
         System.out.println();
         System.out.println("Workout class successfully deleted!");
-        // ADD LOGGER HERE FOR ADMIN DELETING WORKOUT CLASS
+
+        AppLogger.warning("Admin deleted workout class with ID: " + workoutClassID);
     }
 
     // Helper method to validate input date
@@ -313,6 +368,7 @@ public class AdminMenu {
                 convertedDate = LocalDate.parse(classDate);
                 validDate = true;
             } catch (DateTimeParseException error) {
+                System.out.println();
                 System.out.println("Invalid date format!");
             }
         }
@@ -333,6 +389,7 @@ public class AdminMenu {
                 convertedTime = LocalTime.parse(classTime, parser);
                 validTime = true;
             } catch (DateTimeParseException error) {
+                System.out.println();
                 System.out.println("Invalid time format!");
             }
         }
@@ -340,7 +397,7 @@ public class AdminMenu {
     }
 
     // Method to export reports to a text file
-    private void exportReports() throws SQLException {
+    private void exportReports() throws SQLException, IOException {
 
         System.out.println();
         System.out.println("---------- EXPORT REPORT ----------");
@@ -348,34 +405,27 @@ public class AdminMenu {
         System.out.println("2. Membership Revenue Report");
         System.out.println("0. Back");
 
+        System.out.println();
         System.out.print("Enter your choice: ");
         String choice = scanner.nextLine();
 
         switch (choice) {
-
             case "1":
-                MerchandiseReportExporter merchandiseExporter =
-                        new MerchandiseReportExporter();
-
+                MerchandiseReportExporter merchandiseExporter = new MerchandiseReportExporter();
                 merchandiseExporter.exportReport();
 
                 System.out.println();
                 System.out.println("Merchandise report successfully exported!");
                 break;
-
             case "2":
-                MembershipReportExporter membershipExporter =
-                        new MembershipReportExporter();
-
+                MembershipReportExporter membershipExporter = new MembershipReportExporter();
                 membershipExporter.exportReport();
 
                 System.out.println();
                 System.out.println("Membership report successfully exported!");
                 break;
-
             case "0":
                 return;
-
             default:
                 System.out.println("Invalid choice.");
                 break;

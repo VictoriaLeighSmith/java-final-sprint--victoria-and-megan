@@ -22,7 +22,7 @@ public class MerchandiseReportExporter {
         }
     }
 
-    public void exportReport() throws SQLException {
+    public void exportReport() throws SQLException, IOException {
 
         createReportsFolder();
 
@@ -45,19 +45,16 @@ public class MerchandiseReportExporter {
                 writer.write("Merchandise ID: " + item.getMerchandiseID() + "\n");
                 writer.write("Product Name: " + item.getProductName() + "\n");
                 writer.write("Type: " + item.getType() + "\n");
-                writer.write("Price: $" + item.getPrice() + "\n");
+                writer.write(String.format("Price: $%.2f%n", item.getPrice()));
                 writer.write("Stock Level: " + item.getStockLevel() + "\n");
-                writer.write("Item Value: $" + itemValue + "\n");
+                writer.write(String.format("Item Value: $%.2f%n", itemValue));
                 writer.write("----------------------------\n");
 
                 totalInventoryValue += itemValue;
             }
 
             writer.write("\n");
-            writer.write("Total Inventory Value: $" + totalInventoryValue + "\n");
-
-        } catch (IOException e) {
-            System.out.println("Unable to create merchandise report.");
+            writer.write(String.format("Total Inventory Value: $%.2f%n", totalInventoryValue));
         }
     }
 }

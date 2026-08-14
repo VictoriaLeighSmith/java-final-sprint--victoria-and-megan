@@ -22,13 +22,13 @@ public class MemberMenu {
 
     public void showMenu(User loggedInUser) throws SQLException {
         while (true) {
-            System.out.println(" ========== MEMBER MENU ========== ");
             System.out.println();
-            System.out.println(" 1. Purchase Membership");
-            System.out.println(" 2. View Merchandise");
-            System.out.println(" 3. Browse Workout Classes");
-            System.out.println(" 4. View Personal Membership Expenses ");
-            System.out.println(" 0. Log Out");
+            System.out.println("---------- MEMBER MENU ----------");
+            System.out.println("1. Purchase Membership");
+            System.out.println("2. View Merchandise");
+            System.out.println("3. Browse Workout Classes");
+            System.out.println("4. View Personal Membership Expenses");
+            System.out.println("0. Log Out");
 
             System.out.println();
             System.out.print("Choose an option: ");
@@ -52,10 +52,11 @@ public class MemberMenu {
                         System.out.println("Logging out...");
                         return;
                     default:
-                        System.out.println("Invalid choice");
+                        System.out.println("Invalid choice.");
                         break;
                 }
             } catch (IllegalArgumentException error) {
+                System.out.println();
                 System.out.println(error.getMessage());
             }
         }
@@ -67,6 +68,7 @@ public class MemberMenu {
 
         membershipService.purchaseMembership(loggedInUser.getUserID(), membershipType);
 
+        System.out.println();
         System.out.println("Membership successfully purchased!");
     }
 
@@ -74,12 +76,21 @@ public class MemberMenu {
         ArrayList<Merchandise> merchandise = merchandiseService.browseMerchandise();
 
         if (merchandise.isEmpty()) {
-            System.out.println("No merchandise found");
+            System.out.println("No merchandise found.");
             return;
         }
 
+        System.out.println();
+        System.out.println("Available Merchandise:");
+        System.out.println();
+
         for (Merchandise item : merchandise) {
-            System.out.println(item);
+            System.out.println("Merchandise ID: " + item.getMerchandiseID());
+            System.out.println("Product Name: " + item.getProductName());
+            System.out.println("Type: " + item.getType());
+            System.out.printf("Price: $%.2f%n", item.getPrice());
+            System.out.println("Stock Level: " + item.getStockLevel());
+            System.out.println("-".repeat(30));
         }
     }
 
@@ -87,18 +98,29 @@ public class MemberMenu {
         ArrayList<WorkoutClass> workoutClasses = workoutService.getAllWorkoutClasses();
 
         if (workoutClasses.isEmpty()) {
-            System.out.println("No workout classes found");
+            System.out.println("No workout classes found.");
             return;
         }
 
+        System.out.println();
+        System.out.println("Available Workout Classes:");
+        System.out.println();
+
         for (WorkoutClass workoutClass : workoutClasses) {
-            System.out.println(workoutClass);
+            System.out.println("Class ID: " + workoutClass.getClassId());
+            System.out.println("Trainer ID: " + workoutClass.getTrainerId());
+            System.out.println("Class Name: " + workoutClass.getClassName());
+            System.out.println("Description: " + workoutClass.getDescription());
+            System.out.println("Date: " + workoutClass.getClassDate());
+            System.out.println("Time: " + workoutClass.getClassTime());
+            System.out.println("-".repeat(30));
         }
     }
 
     private void viewPersonalExpenses(User loggedInUser) throws SQLException {
         double totalExpenses = membershipService.getTotalExpensesByUser(loggedInUser.getUserID());
 
+        System.out.println();
         System.out.printf("Total membership expenses: $%.2f%n", totalExpenses);
     }
 }

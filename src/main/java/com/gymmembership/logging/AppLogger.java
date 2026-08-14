@@ -13,7 +13,9 @@ public class AppLogger {
         try {
             FileHandler fileHandler = new FileHandler("app.log",true);
             fileHandler.setFormatter(new SimpleFormatter());
+
             logger.addHandler(fileHandler);
+            logger.setUseParentHandlers(false);
         } catch (IOException e) {
             System.out.println("Unable to create log file.");
         }
