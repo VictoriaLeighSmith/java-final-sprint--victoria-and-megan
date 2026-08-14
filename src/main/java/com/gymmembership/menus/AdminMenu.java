@@ -8,7 +8,10 @@ import com.gymmembership.user.User;
 import com.gymmembership.user.UserService;
 import com.gymmembership.workout.WorkoutClass;
 import com.gymmembership.workout.WorkoutClassService;
+import com.gymmembership.reports.MembershipReportExporter;
+import com.gymmembership.reports.MerchandiseReportExporter;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -46,6 +49,7 @@ public class AdminMenu {
             System.out.println("9. Create New Workout Class");
             System.out.println("10. Update Workout Class");
             System.out.println("11. Delete Workout Class");
+            System.out.println("12. Export Reports to File");
             System.out.println("0. Logout");
 
             System.out.println();
@@ -87,6 +91,9 @@ public class AdminMenu {
                     case "11":
                         deleteWorkoutClass();
                         break;
+                    case "12":
+                        exportReports();
+                        break;
                     case "0":
                         System.out.println("Logging out ...");
                         return;
@@ -97,6 +104,10 @@ public class AdminMenu {
             } catch (IllegalArgumentException | IllegalStateException error) {
                 System.out.println();
                 System.out.println(error.getMessage());
+            } catch (IOException error) {
+                AppLogger.warning("File export error: " + error.getMessage());
+                System.out.println();
+                System.out.println("Unable to export report. Please try again.");
             }
         }
     }
@@ -169,14 +180,14 @@ public class AdminMenu {
         System.out.println();
         System.out.println("User successfully deleted!");
 
-        AppLogger.warning("Admin deleted user with ID: " + userID);
+        AppLogger.warning("Admin deleted user: " + userID);
     }
 
     // Method to track total annual membership revenue
     private void displayTotalAnnualRevenue() throws SQLException {
         System.out.print("Enter the year for total annual revenue: ");
         String yearInput = scanner.nextLine();
-        int year  = Integer.parseInt(yearInput);
+        int year = Integer.parseInt(yearInput);
 
         double totalAnnualRevenue = membershipService.getTotalAnnualRevenue(year);
 
@@ -191,7 +202,7 @@ public class AdminMenu {
         System.out.print("Enter the type of merchandise item: ");
         String type = scanner.nextLine();
 
-        System.out.print("Enter the price of the  merchandise item: ");
+        System.out.print("Enter the price of the merchandise item: ");
         String priceInput = scanner.nextLine();
         double price = Double.parseDouble(priceInput);
 
@@ -224,7 +235,7 @@ public class AdminMenu {
         System.out.println();
         System.out.println("Merchandise price updated successfully!");
 
-        AppLogger.warning("Admin changed price for merchandise ID: " + merchandiseID);
+        AppLogger.warning("Admin changed price for item: " + merchandiseID);
     }
 
     // Method to restock merchandise
@@ -235,14 +246,14 @@ public class AdminMenu {
 
         System.out.print("Enter the quantity to add to merchandise stock: ");
         String quantityInput = scanner.nextLine();
-        int  quantity = Integer.parseInt(quantityInput);
+        int quantity = Integer.parseInt(quantityInput);
 
         merchandiseService.addStock(merchandiseID, quantity);
 
         System.out.println();
         System.out.println("Merchandise stock added successfully!");
 
-        AppLogger.warning("Admin restocked merchandise ID: " + merchandiseID);
+        AppLogger.warning("Admin added merchandise stock for item: " + merchandiseID);
     }
 
     // Method to view merchandise stock and total value
@@ -334,7 +345,7 @@ public class AdminMenu {
     private void deleteWorkoutClass() throws SQLException {
         System.out.print("Enter the workout class ID to delete: ");
         String workoutClassIDInput = scanner.nextLine();
-        int  workoutClassID = Integer.parseInt(workoutClassIDInput);
+        int workoutClassID = Integer.parseInt(workoutClassIDInput);
 
         workoutClassService.deleteWorkoutClass(workoutClassID);
 
@@ -366,11 +377,7 @@ public class AdminMenu {
 
     // Helper method to validate input time
     private LocalTime getValidTime(String prompt) {
-        DateTimeFormatter parser = new DateTimeFormatterBuilder()
-                .parseCaseInsensitive()
-                .appendPattern("h:mma")
-                .toFormatter(Locale.ENGLISH);
-
+        DateTimeFormatter parser = new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("h:mma").toFormatter(Locale.ENGLISH);
         LocalTime convertedTime = null;
         boolean validTime = false;
 
@@ -387,5 +394,41 @@ public class AdminMenu {
             }
         }
         return convertedTime;
+    }
+
+    // Method to export reports to a text file
+    private void exportReports() throws SQLException, IOException {
+
+        System.out.println();
+        System.out.println("---------- EXPORT REPORT ----------");
+        System.out.println("1. Merchandise Inventory Report");
+        System.out.println("2. Membership Revenue Report");
+        System.out.println("0. Back");
+
+        System.out.println();
+        System.out.print("Enter your choice: ");
+        String choice = scanner.nextLine();
+
+        switch (choice) {
+            case "1":
+                MerchandiseReportExporter merchandiseExporter = new MerchandiseReportExporter();
+                merchandiseExporter.exportReport();
+
+                System.out.println();
+                System.out.println("Merchandise report successfully exported!");
+                break;
+            case "2":
+                MembershipReportExporter membershipExporter = new MembershipReportExporter();
+                membershipExporter.exportReport();
+
+                System.out.println();
+                System.out.println("Membership report successfully exported!");
+                break;
+            case "0":
+                return;
+            default:
+                System.out.println("Invalid choice.");
+                break;
+        }
     }
 }

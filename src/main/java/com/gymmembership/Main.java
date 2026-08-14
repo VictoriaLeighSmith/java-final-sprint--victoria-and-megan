@@ -6,7 +6,6 @@ import com.gymmembership.menus.MemberMenu;
 import com.gymmembership.menus.TrainerMenu;
 import com.gymmembership.logging.AppLogger;
 import com.gymmembership.user.User;
-
 import java.sql.SQLException;
 import java.util.Scanner;
 
