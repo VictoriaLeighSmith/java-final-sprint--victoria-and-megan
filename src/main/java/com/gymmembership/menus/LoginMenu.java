@@ -20,6 +20,7 @@ public class LoginMenu {
     // Method to display Login menu - return a User object to be used in Main
     public User displayLoginMenu() throws SQLException {
         while (true) {
+            System.out.println();
             System.out.println("---------- LOGIN/REGISTER ----------");
             System.out.println("1. Login");
             System.out.println("2. Register");
@@ -31,14 +32,18 @@ public class LoginMenu {
 
             switch (choice) {
                 case "1":
-                    return loginMenu();
+                    User loggedInUser = loginMenu();
+                    if (loggedInUser != null) {
+                        return loggedInUser;
+                    }
+                    break;
                 case "2":
                     registerMenu();
                     break;
                 case "0":
                     return null;
                 default:
-                    System.out.println("Invalid option");
+                    System.out.println("Invalid choice.");
                     break;
             }
         }
@@ -53,6 +58,15 @@ public class LoginMenu {
         String password = scanner.nextLine();
 
         User user = userService.loginToSystem(username, password);
+
+        if (user == null) {
+            System.out.println("Invalid username or password");
+            return null;
+        }
+
+        System.out.println();
+        System.out.println("Login successful!");
+
         return user;
     }
 

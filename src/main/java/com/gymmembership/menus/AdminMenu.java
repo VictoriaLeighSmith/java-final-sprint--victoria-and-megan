@@ -36,15 +36,16 @@ public class AdminMenu {
             System.out.println();
             System.out.println("---------- ADMIN MENU ----------");
             System.out.println("1. Display All Users");
-            System.out.println("2. Delete User");
-            System.out.println("3. Get Total Annual Revenue");
-            System.out.println("4. Add New Merchandise");
-            System.out.println("5. Update Merchandise Price");
-            System.out.println("6. Restock Merchandise");
-            System.out.println("7. View All Merchandise and Total Value");
-            System.out.println("8. Create New Workout Class");
-            System.out.println("9. Update Workout Class");
-            System.out.println("10. Delete Workout Class");
+            System.out.println("2. Add Trainer");
+            System.out.println("3. Delete User");
+            System.out.println("4. Get Total Annual Revenue");
+            System.out.println("5. Add New Merchandise");
+            System.out.println("6. Update Merchandise Price");
+            System.out.println("7. Restock Merchandise");
+            System.out.println("8. View All Merchandise and Total Value");
+            System.out.println("9. Create New Workout Class");
+            System.out.println("10. Update Workout Class");
+            System.out.println("11. Delete Workout Class");
             System.out.println("0. Logout");
 
             System.out.println();
@@ -57,30 +58,33 @@ public class AdminMenu {
                         displayAllUsers();
                         break;
                     case "2":
-                        deleteUser();
+                        addTrainer();
                         break;
                     case "3":
-                        displayTotalAnnualRevenue();
+                        deleteUser(loggedInUser);
                         break;
                     case "4":
-                        addNewMerchandiseItem();
+                        displayTotalAnnualRevenue();
                         break;
                     case "5":
-                        updateMerchandisePrice();
+                        addNewMerchandiseItem();
                         break;
                     case "6":
-                        restockMerchandise();
+                        updateMerchandisePrice();
                         break;
                     case "7":
-                        viewMerchandiseAndTotalValue();
+                        restockMerchandise();
                         break;
                     case "8":
-                        createWorkoutClass();
+                        viewMerchandiseAndTotalValue();
                         break;
                     case "9":
-                        updateWorkoutClass();
+                        createWorkoutClass();
                         break;
                     case "10":
+                        updateWorkoutClass();
+                        break;
+                    case "11":
                         deleteWorkoutClass();
                         break;
                     case "0":
@@ -91,6 +95,7 @@ public class AdminMenu {
                         break;
                 }
             } catch (IllegalArgumentException | IllegalStateException error) {
+                System.out.println();
                 System.out.println(error.getMessage());
             }
         }
@@ -102,11 +107,11 @@ public class AdminMenu {
 
         if (allUsers.isEmpty()) {
             System.out.println();
-            System.out.println("No users found");
+            System.out.println("No users found.");
             return;
         }
 
-        // We'll need to fix this output once we start testing. Not bothering with it until I can see it.
+        System.out.println();
         System.out.println("All Current Users:");
         System.out.println();
 
@@ -117,15 +122,47 @@ public class AdminMenu {
             System.out.println("Phone Number: " + user.getPhoneNumber());
             System.out.println("Address: " + user.getAddress());
             System.out.println("Role: " + user.getRole());
-            System.out.println("-".repeat(20));
+            System.out.println("-".repeat(30));
         }
     }
 
+    // Method to add new trainer to the system
+    private void addTrainer() throws SQLException {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+
+        System.out.print("Enter phone number: ");
+        String phoneNumber = scanner.nextLine();
+
+        System.out.print("Enter address: ");
+        String address = scanner.nextLine();
+
+        User trainer = new User(username, password, email, phoneNumber, address);
+
+        userService.saveNewTrainer(trainer);
+
+        System.out.println();
+        System.out.println("Trainer successfully created!");
+
+        AppLogger.warning("Admin created trainer account: " + username);
+    }
+
     // Method to delete users from the system
-    private void deleteUser() throws SQLException {
+    private void deleteUser(User loggedInUser) throws SQLException {
         System.out.print("Enter the ID of the user you want to delete: ");
-        int userID = scanner.nextInt();
-        scanner.nextLine();
+        String userIDInput = scanner.nextLine();
+        int userID = Integer.parseInt(userIDInput);
+
+        // Check to make sure the user isn't trying to nuke their own admin account. Could cause issues if they're the only admin in the system.
+        if (userID == loggedInUser.getUserID()) {
+            throw new IllegalArgumentException("You can't delete your own admin account.");
+        }
 
         userService.deleteUser(userID);
 
@@ -138,8 +175,8 @@ public class AdminMenu {
     // Method to track total annual membership revenue
     private void displayTotalAnnualRevenue() throws SQLException {
         System.out.print("Enter the year for total annual revenue: ");
-        int year = scanner.nextInt();
-        scanner.nextLine();
+        String yearInput = scanner.nextLine();
+        int year  = Integer.parseInt(yearInput);
 
         double totalAnnualRevenue = membershipService.getTotalAnnualRevenue(year);
 
@@ -155,16 +192,19 @@ public class AdminMenu {
         String type = scanner.nextLine();
 
         System.out.print("Enter the price of the  merchandise item: ");
-        double price = scanner.nextDouble();
-        scanner.nextLine();
+        String priceInput = scanner.nextLine();
+        double price = Double.parseDouble(priceInput);
 
         System.out.print("Enter the quantity of the merchandise item: ");
-        int stockLevel = scanner.nextInt();
-        scanner.nextLine();
+        String stockLevelInput = scanner.nextLine();
+        int stockLevel = Integer.parseInt(stockLevelInput);
 
         Merchandise merchandise = new Merchandise(productName, type, price, stockLevel);
 
         merchandiseService.addMerchandise(merchandise);
+
+        System.out.println();
+        System.out.println("Merchandise successfully added!");
 
         AppLogger.warning("Admin added new merchandise item: " + productName);
     }
@@ -172,12 +212,12 @@ public class AdminMenu {
     // Method to change merchandise item's price
     private void updateMerchandisePrice() throws SQLException {
         System.out.print("Enter the ID of the merchandise item: ");
-        int merchandiseID = scanner.nextInt();
-        scanner.nextLine();
+        String merchandiseIDInput = scanner.nextLine();
+        int merchandiseID = Integer.parseInt(merchandiseIDInput);
 
         System.out.print("Enter the new price of the merchandise item: ");
-        double merchandisePrice = scanner.nextDouble();
-        scanner.nextLine();
+        String merchandisePriceInput = scanner.nextLine();
+        double merchandisePrice = Double.parseDouble(merchandisePriceInput);
 
         merchandiseService.changeProductPrice(merchandiseID, merchandisePrice);
 
@@ -190,12 +230,12 @@ public class AdminMenu {
     // Method to restock merchandise
     private void restockMerchandise() throws SQLException {
         System.out.print("Enter the ID of the merchandise item: ");
-        int merchandiseID = scanner.nextInt();
-        scanner.nextLine();
+        String merchandiseIDInput = scanner.nextLine();
+        int merchandiseID = Integer.parseInt(merchandiseIDInput);
 
         System.out.print("Enter the quantity to add to merchandise stock: ");
-        int quantity = scanner.nextInt();
-        scanner.nextLine();
+        String quantityInput = scanner.nextLine();
+        int  quantity = Integer.parseInt(quantityInput);
 
         merchandiseService.addStock(merchandiseID, quantity);
 
@@ -215,16 +255,17 @@ public class AdminMenu {
             return;
         }
 
+        System.out.println();
         System.out.println("All Merchandise Items:");
+        System.out.println();
 
         for (Merchandise merchandise : allMerchandise) {
-            System.out.println();
             System.out.println("Merchandise ID: " + merchandise.getMerchandiseID());
             System.out.println("Merchandise Name: " + merchandise.getProductName());
             System.out.println("Merchandise Type: " + merchandise.getType());
             System.out.printf("Merchandise Price: $%.2f%n", merchandise.getPrice());
             System.out.println("Merchandise Stock Level: " + merchandise.getStockLevel());
-            System.out.println("-".repeat(20));
+            System.out.println("-".repeat(30));
         }
 
         double totalValue = merchandiseService.calculateInventoryValue();
@@ -236,8 +277,8 @@ public class AdminMenu {
     // Method to create a workout class
     private void createWorkoutClass() throws SQLException {
         System.out.print("Enter the trainer ID for the workout class: ");
-        int trainerID = scanner.nextInt();
-        scanner.nextLine();
+        String trainerIDInput = scanner.nextLine();
+        int trainerID = Integer.parseInt(trainerIDInput);
 
         System.out.print("Enter the workout class name: ");
         String className = scanner.nextLine();
@@ -249,13 +290,7 @@ public class AdminMenu {
         LocalTime convertedTime = getValidTime("Enter the workout class time (e.g. 6:30PM): ");
 
         // Create a new workout class with the user input
-        WorkoutClass workoutClass = new WorkoutClass(
-                trainerID,
-                className,
-                classDescription,
-                convertedDate,
-                convertedTime
-        );
+        WorkoutClass workoutClass = new WorkoutClass(trainerID, className, classDescription, convertedDate, convertedTime);
 
         workoutClassService.createWorkoutClass(workoutClass);
 
@@ -268,12 +303,12 @@ public class AdminMenu {
     // Method to update workout class
     private void updateWorkoutClass() throws SQLException {
         System.out.print("Enter the workout class ID you wish to update: ");
-        int workoutClassID = scanner.nextInt();
-        scanner.nextLine();
+        String workoutClassIDInput = scanner.nextLine();
+        int workoutClassID = Integer.parseInt(workoutClassIDInput);
 
         System.out.print("Enter the new trainer ID: ");
-        int trainerID = scanner.nextInt();
-        scanner.nextLine();
+        String trainerIDInput = scanner.nextLine();
+        int trainerID = Integer.parseInt(trainerIDInput);
 
         System.out.print("Enter the new workout class name: ");
         String className = scanner.nextLine();
@@ -285,14 +320,7 @@ public class AdminMenu {
         LocalTime convertedTime = getValidTime("Enter the new workout class time (e.g. 6:30PM): ");
 
         // Create new workout class with updated values
-        WorkoutClass workoutClass = new WorkoutClass(
-                workoutClassID,
-                trainerID,
-                className,
-                classDescription,
-                convertedDate,
-                convertedTime
-        );
+        WorkoutClass workoutClass = new WorkoutClass(workoutClassID, trainerID, className, classDescription, convertedDate, convertedTime);
 
         workoutClassService.updateWorkoutClass(workoutClass);
 
@@ -305,8 +333,8 @@ public class AdminMenu {
     // Method to delete workout class
     private void deleteWorkoutClass() throws SQLException {
         System.out.print("Enter the workout class ID to delete: ");
-        int workoutClassID = scanner.nextInt();
-        scanner.nextLine();
+        String workoutClassIDInput = scanner.nextLine();
+        int  workoutClassID = Integer.parseInt(workoutClassIDInput);
 
         workoutClassService.deleteWorkoutClass(workoutClassID);
 
@@ -329,6 +357,7 @@ public class AdminMenu {
                 convertedDate = LocalDate.parse(classDate);
                 validDate = true;
             } catch (DateTimeParseException error) {
+                System.out.println();
                 System.out.println("Invalid date format!");
             }
         }
@@ -353,6 +382,7 @@ public class AdminMenu {
                 convertedTime = LocalTime.parse(classTime, parser);
                 validTime = true;
             } catch (DateTimeParseException error) {
+                System.out.println();
                 System.out.println("Invalid time format!");
             }
         }

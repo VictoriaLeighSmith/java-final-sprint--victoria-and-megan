@@ -29,14 +29,14 @@ public class TrainerMenu {
     public void showMenu(User loggedInUser) throws SQLException {
         while (true) {
             System.out.println();
-            System.out.println(" ========== TRAINER MENU ========== ");
-            System.out.println(" 1. Create Workout Class");
-            System.out.println(" 2. Update Workout Class");
-            System.out.println(" 3. Delete Workout Class");
-            System.out.println(" 4. Purchase Membership");
-            System.out.println(" 5. View My Workout Classes");
-            System.out.println(" 6. View Merchandise");
-            System.out.println(" 7. Log Out");
+            System.out.println("---------- TRAINER MENU ----------");
+            System.out.println("1. Create Workout Class");
+            System.out.println("2. Update Workout Class");
+            System.out.println("3. Delete Workout Class");
+            System.out.println("4. Purchase Membership");
+            System.out.println("5. View My Workout Classes");
+            System.out.println("6. View Merchandise");
+            System.out.println("0. Log Out");
 
             System.out.println();
             System.out.print("Choose an option: ");
@@ -62,14 +62,15 @@ public class TrainerMenu {
                     case "6":
                         browseMerchandise();
                         break;
-                    case "7":
+                    case "0":
                         System.out.println("Logging out...");
                         return;
                     default:
-                        System.out.println("Invalid choice");
+                        System.out.println("Invalid choice.");
                         break;
                 }
-            } catch (IllegalArgumentException error) {
+            } catch (IllegalArgumentException | IllegalStateException error) {
+                System.out.println();
                 System.out.println(error.getMessage());
             }
         }
@@ -90,25 +91,26 @@ public class TrainerMenu {
         WorkoutClass newClass = new WorkoutClass(trainerId, className, classDescription, convertedDate, convertedTime);
 
         workoutService.createWorkoutClass(newClass);
+
+        System.out.println();
         System.out.println("Successfully created workout class!");
     }
 
     private void updateWorkoutClass(User loggedInUser) throws SQLException {
         System.out.print("Enter the class ID: ");
-        int classId = scanner.nextInt();
-        scanner.nextLine();
+        String classId = scanner.nextLine();
 
-        WorkoutClass workoutClass = workoutService.getClassByID(classId);
-
-        System.out.println("Your selected class is: " + workoutClass);
+        WorkoutClass workoutClass = workoutService.getClassByID(Integer.parseInt(classId));
 
         while (true) {
-            System.out.println(" 1. Change Class Name");
-            System.out.println(" 2. Change Description");
-            System.out.println(" 3. Change Date");
-            System.out.println(" 4. Change Time");
-            System.out.println(" 5. Save Changes");
-            System.out.println(" 0. Cancel");
+            System.out.println();
+            System.out.println("---------- UPDATE " + workoutClass.getClassName().toUpperCase() + " ----------");
+            System.out.println("1. Change Class Name");
+            System.out.println("2. Change Description");
+            System.out.println("3. Change Date");
+            System.out.println("4. Change Time");
+            System.out.println("5. Save Changes");
+            System.out.println("0. Cancel");
 
             System.out.println();
             System.out.print("Choose an update option: ");
@@ -135,6 +137,7 @@ public class TrainerMenu {
                     break;
                 case "5":
                     workoutService.updateWorkoutClass(workoutClass, loggedInUser.getUserID());
+                    System.out.println();
                     System.out.println("Workout class successfully updated!");
                     return;
                 case "0":
@@ -149,12 +152,12 @@ public class TrainerMenu {
 
     private void deleteClass(User loggedInUser) throws SQLException {
         System.out.print("Enter the ID of the class you want to delete: ");
-        int deleteClassID = scanner.nextInt();
-        scanner.nextLine();
+        String deleteClassID = scanner.nextLine();
 
-        workoutService.deleteWorkoutClass(deleteClassID, loggedInUser.getUserID());
+        workoutService.deleteWorkoutClass(Integer.parseInt(deleteClassID), loggedInUser.getUserID());
 
-        System.out.println("Class successfully deleted.");
+        System.out.println();
+        System.out.println("Class successfully deleted!");
     }
 
     private void purchaseMembership(User loggedInUser) throws SQLException {
@@ -163,6 +166,7 @@ public class TrainerMenu {
 
         membershipService.purchaseMembership(loggedInUser.getUserID(), membershipType);
 
+        System.out.println();
         System.out.println("Membership successfully purchased!");
     }
 
@@ -170,15 +174,22 @@ public class TrainerMenu {
         ArrayList<WorkoutClass> workoutClasses = workoutService.getAllClassesByTrainer(loggedInUser.getUserID());
 
         if (workoutClasses.isEmpty()) {
+            System.out.println();
             System.out.println("You do not have any workout classes assigned.");
             return;
         }
 
+        System.out.println();
         System.out.println("Your Workout Classes:");
         System.out.println();
 
         for (WorkoutClass workoutClassByTrainer : workoutClasses) {
-            System.out.println(workoutClassByTrainer);
+            System.out.println("Class ID: " + workoutClassByTrainer.getClassId());
+            System.out.println("Class Name: " + workoutClassByTrainer.getClassName());
+            System.out.println("Description: " + workoutClassByTrainer.getDescription());
+            System.out.println("Date: " + workoutClassByTrainer.getClassDate());
+            System.out.println("Time: " + workoutClassByTrainer.getClassTime());
+            System.out.println("-".repeat(30));
         }
     }
 
@@ -186,14 +197,22 @@ public class TrainerMenu {
         ArrayList<Merchandise> merchandise = merchandiseService.browseMerchandise();
 
         if (merchandise.isEmpty()) {
-            System.out.println("No merchandise available");
+            System.out.println();
+            System.out.println("No merchandise available.");
             return;
         }
 
+        System.out.println();
         System.out.println("Available Merchandise:");
         System.out.println();
+
         for (Merchandise item : merchandise) {
-            System.out.println(item);
+            System.out.println("Merchandise ID: " + item.getMerchandiseID());
+            System.out.println("Product Name: " + item.getProductName());
+            System.out.println("Type: " + item.getType());
+            System.out.printf("Price: $%.2f%n", item.getPrice());
+            System.out.println("Stock Level: " + item.getStockLevel());
+            System.out.println("-".repeat(30));
         }
     }
 
@@ -210,6 +229,7 @@ public class TrainerMenu {
                 convertedDate = LocalDate.parse(classDate);
                 validDate = true;
             } catch (DateTimeParseException error) {
+                System.out.println();
                 System.out.println("Invalid date format!");
             }
         }
@@ -230,6 +250,7 @@ public class TrainerMenu {
                 convertedTime = LocalTime.parse(classTime, parser);
                 validTime = true;
             } catch (DateTimeParseException error) {
+                System.out.println();
                 System.out.println("Invalid time format!");
             }
         }

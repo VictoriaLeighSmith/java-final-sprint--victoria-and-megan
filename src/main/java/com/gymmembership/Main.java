@@ -23,7 +23,6 @@ public class Main {
 
         try {
             while (true) {
-
                 // Create logged in user and display the login menu
                 User loggedInUser = loginMenu.displayLoginMenu();
 
@@ -32,7 +31,7 @@ public class Main {
                     break;
                 }
 
-                // Get the logged in users role
+                // Get the logged in user's role
                 String loggedInUserRole = loggedInUser.getRole().toUpperCase();
 
                 // Use the logged in user's role to display the appropriate menu
@@ -41,25 +40,23 @@ public class Main {
                         AdminMenu adminMenu = new AdminMenu(scanner);
                         adminMenu.showMenu(loggedInUser);
                         break;
-
                     case "TRAINER":
                         TrainerMenu trainerMenu = new TrainerMenu(scanner);
                         trainerMenu.showMenu(loggedInUser);
                         break;
-
                     case "MEMBER":
                         MemberMenu memberMenu = new MemberMenu(scanner);
                         memberMenu.showMenu(loggedInUser);
                         break;
-
                     default:
-                        System.out.println("Invalid user role");
+                        System.out.println("Invalid user role.");
                         break;
                 }
             }
 
         } catch (SQLException error) {
             AppLogger.warning("Database transaction error: " + error.getMessage());
+            System.out.println();
             System.out.println("A database error occurred. Please try again.");
         }
 

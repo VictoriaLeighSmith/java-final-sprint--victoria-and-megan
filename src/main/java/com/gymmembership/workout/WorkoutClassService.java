@@ -1,4 +1,7 @@
 package com.gymmembership.workout;
+import com.gymmembership.user.User;
+import com.gymmembership.user.UserDAO;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -6,6 +9,7 @@ public class WorkoutClassService {
 
     // DAO used to communicate with the workout_classes table
     private final WorkoutClassDAO workoutClassDao = new WorkoutClassDAO();
+    private final UserDAO userDao = new UserDAO();
 
     // Validates workout class information before saving it to the database
     public void createWorkoutClass(WorkoutClass workoutClass) throws SQLException {
@@ -13,9 +17,7 @@ public class WorkoutClassService {
             throw new IllegalArgumentException("Workout class must be provided.");
         }
 
-        if (workoutClass.getTrainerId() <= 0) {
-            throw new IllegalArgumentException("Trainer ID must be greater than 0.");
-        }
+        validateTrainer(workoutClass.getTrainerId());
 
         if (workoutClass.getClassName() == null ||
                 workoutClass.getClassName().isBlank()) {
@@ -71,9 +73,7 @@ public class WorkoutClassService {
             throw new IllegalArgumentException("Workout class not found.");
         }
 
-        if (workoutClass.getTrainerId() <= 0) {
-            throw new IllegalArgumentException("Trainer ID must be greater than 0.");
-        }
+        validateTrainer(workoutClass.getTrainerId());
 
         if (workoutClass.getClassName() == null ||
                 workoutClass.getClassName().isBlank()) {
@@ -140,7 +140,7 @@ public class WorkoutClassService {
         boolean deleted = workoutClassDao.deleteWorkoutClass(classId);
 
         if (!deleted) {
-            throw new IllegalArgumentException("Workout class could not be deleted.");
+            throw new IllegalStateException("Workout class could not be deleted.");
         }
     }
 
@@ -180,5 +180,22 @@ public class WorkoutClassService {
         }
 
         return workoutClass;
+    }
+
+    // Method to validate trainer - this allows us to ensure that a trainer and ID match up when creating a workout class/assigning trainer
+    private void validateTrainer(int trainerId) throws SQLException {
+        if (trainerId <= 0) {
+            throw new IllegalArgumentException("Trainer ID must be greater than 0.");
+        }
+
+        User trainer = userDao.getByID(trainerId);
+
+        if (trainer == null) {
+            throw new IllegalArgumentException("Trainer not found.");
+        }
+
+        if (!trainer.getRole().equalsIgnoreCase("TRAINER")) {
+            throw new IllegalArgumentException("User with ID " + trainerId + " is not a trainer.");
+        }
     }
 }
