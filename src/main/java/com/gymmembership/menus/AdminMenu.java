@@ -7,6 +7,8 @@ import com.gymmembership.user.User;
 import com.gymmembership.user.UserService;
 import com.gymmembership.workout.WorkoutClass;
 import com.gymmembership.workout.WorkoutClassService;
+import com.gymmembership.reports.MembershipReportExporter;
+import com.gymmembership.reports.MerchandiseReportExporter;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -44,6 +46,7 @@ public class AdminMenu {
             System.out.println("8. Create New Workout Class");
             System.out.println("9. Update Workout Class");
             System.out.println("10. Delete Workout Class");
+            System.out.println("11. Export Reports to File");
             System.out.println("0. Logout");
 
             System.out.println();
@@ -81,6 +84,9 @@ public class AdminMenu {
                         break;
                     case "10":
                         deleteWorkoutClass();
+                        break;
+                    case "11":
+                        exportReports();
                         break;
                     case "0":
                         System.out.println("Logging out ...");
@@ -331,5 +337,48 @@ public class AdminMenu {
             }
         }
         return convertedTime;
+    }
+
+    // Method to export reports to a text file
+    private void exportReports() throws SQLException {
+
+        System.out.println();
+        System.out.println("---------- EXPORT REPORT ----------");
+        System.out.println("1. Merchandise Inventory Report");
+        System.out.println("2. Membership Revenue Report");
+        System.out.println("0. Back");
+
+        System.out.print("Enter your choice: ");
+        String choice = scanner.nextLine();
+
+        switch (choice) {
+
+            case "1":
+                MerchandiseReportExporter merchandiseExporter =
+                        new MerchandiseReportExporter();
+
+                merchandiseExporter.exportReport();
+
+                System.out.println();
+                System.out.println("Merchandise report successfully exported!");
+                break;
+
+            case "2":
+                MembershipReportExporter membershipExporter =
+                        new MembershipReportExporter();
+
+                membershipExporter.exportReport();
+
+                System.out.println();
+                System.out.println("Membership report successfully exported!");
+                break;
+
+            case "0":
+                return;
+
+            default:
+                System.out.println("Invalid choice.");
+                break;
+        }
     }
 }
