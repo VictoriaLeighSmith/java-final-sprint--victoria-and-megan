@@ -161,7 +161,7 @@ public class AdminMenu {
         System.out.println();
         System.out.println("Trainer successfully created!");
 
-        AppLogger.warning("Admin created trainer account: " + username);
+        AppLogger.info("Admin created trainer account: " + username);
     }
 
     // Method to delete users from the system
@@ -217,7 +217,7 @@ public class AdminMenu {
         System.out.println();
         System.out.println("Merchandise successfully added!");
 
-        AppLogger.warning("Admin added new merchandise item: " + productName);
+        AppLogger.info("Admin added new merchandise item: " + productName);
     }
 
     // Method to change merchandise item's price
@@ -235,7 +235,7 @@ public class AdminMenu {
         System.out.println();
         System.out.println("Merchandise price updated successfully!");
 
-        AppLogger.warning("Admin changed price for item: " + merchandiseID);
+        AppLogger.info("Admin changed price for item: " + merchandiseID);
     }
 
     // Method to restock merchandise
@@ -253,7 +253,7 @@ public class AdminMenu {
         System.out.println();
         System.out.println("Merchandise stock added successfully!");
 
-        AppLogger.warning("Admin added merchandise stock for item: " + merchandiseID);
+        AppLogger.info("Admin added merchandise stock for item: " + merchandiseID);
     }
 
     // Method to view merchandise stock and total value
@@ -308,7 +308,7 @@ public class AdminMenu {
         System.out.println();
         System.out.println("Workout class successfully created!");
 
-        AppLogger.warning("Admin created workout class: " + className);
+        AppLogger.info("Admin created workout class: " + className);
     }
 
     // Method to update workout class
@@ -338,7 +338,7 @@ public class AdminMenu {
         System.out.println();
         System.out.println("Workout class successfully updated!");
 
-        AppLogger.warning("Admin updated workout class with ID: " + workoutClassID);
+        AppLogger.info("Admin updated workout class with ID: " + workoutClassID);
     }
 
     // Method to delete workout class
